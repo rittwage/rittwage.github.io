@@ -1,0 +1,43 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/M1800.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:34:38 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="M0723.html">Previous Page</A> <A HREF="M1805.html">Next Page</A>
+
+ $1800:   Data Port B (ATN, CLOCK, DATA, Device #)
+
+   +----------+---------------------------------------------------+
+   | Bit  7   |   ATN IN                                          |
+   | Bits 6-5 |   Device address preset switches:                 |
+   |          |     00 = #8, 01 = #9, 10 = #10, 11 = #11          |
+   | Bit  4   |   ATN acknowledge OUT                             |
+   | Bit  3   |   CLOCK OUT                                       |
+   | Bit  2   |   CLOCK IN                                        |
+   | Bit  1   |   DATA OUT                                        |
+   | Bit  0   |   DATA IN                                         |
+   +----------+---------------------------------------------------+
+
+ --- Information taken from AAY1541 - http://www.the-dreams.de ----
+
+RapidLok-Reference:
+
+ STY $1800  : <A HREF="R07B0.html">$07CB</A>
+ STA $1800  : <A HREF="R0300.html">$0379</A>
+ STA $1800  : <A HREF="R0587.html">$05EB</A>
+ STA $1800  : <A HREF="R0587.html">$05F9</A>
+ STA $1800  : <A HREF="R0625.html">$0637</A>
+ LDX $1800  : <A HREF="R0625.html">$063B</A>
+ CPX $1800  : <A HREF="R0625.html">$063E</A>
+ CPX $1800  : <A HREF="R0625.html">$0645</A>
+ STA $1800  : <A HREF="R0625.html">$064A</A>
+ STA $1800  : <A HREF="R0625.html">$0650</A>
+ STA $1800  : <A HREF="R0625.html">$0654</A>
+ STA $1800  : <A HREF="R0625.html">$065A</A>
+ STA $1800  : <A HREF="R0625.html">$0661</A>
+ STX $1800  : <A HREF="R0786.html">$0798</A>
+
+    <A HREF="M0723.html">Previous Page</A> / <A HREF="M1805.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/M1800.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:34:38 GMT -->
+</HTML>

@@ -1,0 +1,63 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/I_CR_G64.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:31:38 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE>
+<STYLE type="text/css">
+CODE { FONT-WEIGHT: bold; COLOR: #9a0000; FONT-FAMILY: "Courier New", Courier, mono }
+</STYLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+
+
+<P><H2>Creating G64 images from original Pirates</H2>
+
+For creating G64 images from your original Microprose Pirates disk you will
+need the following:
+
+<U>Required hardware:</U> 
+
+- Windows 2000/XP PC with parallel (printer) port
+- 1541 disk drive with parallel port (hardware addon; drive ID set to 8)
+- XAP1541 parallel cable for connecting the two (other cables or USB
+  solutions may also work)
+
+<U>Required software:</U>
+
+- "nibtools 0.5.1" copy program for Windows 2000/XP
+- "opencbm 0.4.0" Windows 2000/XP drivers for connecting to the 1541
+- <U>original</U> Microprose Pirates disk
+
+<U>Instructions:</U> 
+
+Connect your 1541/1571 to your PC using the XAP1541 cable (turn them off
+before connecting!) and run <CODE>instcbm.exe</CODE> from "opencbm" to start the driver.
+Now make sure your <U>original</U> Pirates disk is in the 1541 drive, open a Windows
+command shell (cmd.exe) and change to the "nibtools" directory. Then type
+in
+    <CODE>nibread -E36 side1.nib</CODE>
+
+to copy the whole disk side (<u><b>E</b></u>nding Track 36). And
+
+    <CODE>nibconv side1.nib side1.g64</CODE>
+
+will convert it into the needed G64 file format. Repeat this with the
+backside of your Pirates disk. You should now have two G64 files: side1.g64
+and side2.g64, each 333.744 bytes in size.
+
+Finally run <CODE>instcbm.exe -r</CODE> to unload the driver.
+
+If you want to create a working 1541 disk to play the game on a real C64
+you may also need <U>D64</U> images: <CODE>nibconv side1.nib side1.d64</CODE> will convert
+into D64 file format (same with side 2). You should then have two D64
+files: side1.d64 and side2.d64, each 175.531 bytes in size.
+
+The game will most likely <u>not</u> run from those G64 images. You have to apply
+patches for playing the game in WinVice and possibly on the real C64.
+You also need to have "True drive emulation" enabled for WinVice gameplay.
+To play the backup on the real C64 you should read the remaster
+instructions.
+
+Here is a complete sample <A HREF="I_CR_LOG.html">console logfile</A> of the NIB/G64 image creation.
+</P>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/I_CR_G64.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:31:38 GMT -->
+</HTML>

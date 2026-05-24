@@ -1,0 +1,25 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R037F.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:34:49 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R0300.html">Previous Page</A> <A HREF="R0400.html">Next Page</A>
+
+
+Routine $037F:   Decrypt code area [$0420-$046D] (bit shift), [$79]:=-3 (#params to copy in $0587 routine).
+
+JSR from <A HREF="R0786.html">$078B</A>, Jump from $0383:
+
+037F: 3E 20 04  ROL $0420,X    ; Bit shift
+0382: CA        DEX
+0383: 10 FA     BPL $037F
+
+0385: CA        DEX
+0386: CA        DEX
+0387: 86 79     STX <A HREF="M0077.html">$79</A>        ; Set number of parameters to copy in $0587 routine (negative, usually $FD=-3)
+0389: 60        RTS
+
+    <A HREF="R0300.html">Previous Page</A> / <A HREF="R0400.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R037F.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:34:49 GMT -->
+</HTML>

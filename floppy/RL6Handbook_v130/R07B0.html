@@ -1,0 +1,98 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R07B0.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:34:49 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="RMAIN.html">Previous Page</A> <A HREF="R0206.html">Next Page</A>
+
+
+Routine $07B0:   Entry Point, get current file Track/Sector, load RL6 sectors into memory
+
+<P>This is the entry point of RapidLok6 inside the 1541 (<A HREF="I_HINT.html">nice hint</A>). It's the
+"strange looking garbage" you see in Figure #1 of the last tutorial (Track 18,
+Sector 0). The $07xx memory is the buffer for the BAM, so this code gets
+automatically into the drive's memory when a file gets loaded by the normal
+1541 ROM routines. The code gets executed by the "M-E" command sent from the
+C64-client.
+First this routine locates the currently loaded Directory sector and extracts
+some values from the Directory record of the file that has to be loaded (i.e.
+starting Track/Sector). There has to be some Directory sector in memory
+because the 1541 ROM has to find the details for the file to be loaded. Then
+it signals the C64-client to pass $02DA-$02DF wait loop. Finally the
+RapidLok sectors 6,9,12,15 from Track 18 are loaded into the drive memory and
+execution is passed to the $0206 routine.</P>
+
+07B0: 78        SEI
+07B1: AD 90 02  LDA <A HREF="M0290.html">$0290</A>      ; get currently loaded Track 18 Directory sector
+07B4: A2 05     LDX #$05
+
+Jump from $07BC:
+
+07B6: D5 08     CMP <A HREF="M0001.html">$08,X</A>      ; search Sectors of all Floppy Jobs for matching currently loaded Directory sector
+07B8: F0 04     BEQ $07BE      ; branch if Floppy Job was found that loaded the current Directory sector
+
+07BA: CA        DEX
+07BB: CA        DEX
+07BC: 10 F8     BPL $07B6
+
+Jump from $07B8:
+
+07BE: 8A        TXA
+07BF: 69 99     ADC #$99       ; add delta value to get current pointer into buffer containing Directory Sector
+07C1: 8D CF 07  STA $07CF      ; update own code below to use that pointer
+07C4: A2 04     LDX #$04
+07C6: A0 1A     LDY #$1A
+07C8: 8C 07 1C  STY <A HREF="M1C07.html">$1C07</A>
+07CB: 8C 00 18  STY <A HREF="M1800.html">$1800</A>      ; Signal for C64-client to pass $02DA-$02DF wait loop
+
+Jump from $07D4:
+
+07CE: B1 9D     LDA <A HREF="M009D.html">($9D),Y</A>    ; copy 5-byte info from current file's Directory data record to [$77-$7B]
+07D0: 95 77     STA <A HREF="M0077.html">$77,X</A>      ; [$77-$78] = start track & sector ID of file to find & read (encrypted)
+07D2: 88        DEY
+07D3: CA        DEX
+07D4: 10 F8     BPL $07CE
+
+07D6: A5 22     LDA <A HREF="M0022.html">$22</A>        ; Current track for drive 0: Track 18
+07D8: A2 08     LDX #$08
+07DA: A0 03     LDY #$03
+
+Jump from $07E5:
+
+07DC: 94 07     STY <A HREF="M0001.html">$07,X</A>      ; set Sectors 3,6,9,12,15 to Jobs #4 - #0
+07DE: 95 06     STA <A HREF="M0001.html">$06,X</A>      ; set Track 18 to Jobs #4 - #0
+07E0: C8        INY
+07E1: C8        INY
+07E2: C8        INY
+07E3: CA        DEX
+07E4: CA        DEX
+07E5: 10 F5     BPL $07DC
+
+07E7: A2 03     LDX #$03
+
+Jump from $07F3, $07F8:
+
+07E9: A0 80     LDY #$80
+07EB: 94 00     STY <A HREF="M0001.html">$00,X</A>      ; set $80 = Read sector to Jobs #3 - #0 (sectors 6,9,12,15 -> [$06xx]-[$03xx])
+07ED: 58        CLI            ; enable Interrupts so Jobs can be executed by 1541
+
+Jump from $07F0:
+
+07EE: B5 00     LDA <A HREF="M0001.html">$00,X</A>      ; get Job status/results
+07F0: 30 FC     BMI $07EE      ; Job result <0 if not executed so far
+
+07F2: 4A        LSR A          ; A = Job result (=1 if Everything OK)
+07F3: D0 F4     BNE $07E9      ; branch to restart Job if something wrong with Job result
+
+07F5: A5 3A     LDA <A HREF="M003A.html">$3A</A>        ; parity for data buffer
+07F7: CA        DEX
+07F8: 10 EF     BPL $07E9
+
+07FA: 78        SEI            ; prevent following Job #4 from being executed (would overwrite code here)
+07FB: 84 04     STY <A HREF="M0001.html">$04</A>        ; set $80 = Read sector to Job #4 (buffer $07xx)
+07FD: 4C 06 02  JMP <A HREF="R0206.html">$0206</A>
+
+    <A HREF="RMAIN.html">Previous Page</A> / <A HREF="R0206.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R07B0.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:34:49 GMT -->
+</HTML>

@@ -1,0 +1,69 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R050D.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:34:49 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R0480.html">Previous Page</A> <A HREF="R052A.html">Next Page</A>
+
+
+Routine $050D:   Count byte-readys (->[$0150]) until next Sync mark
+                 or timeout. CF:=0 if Sync found.
+
+<P>This routine counts byte-readys (in X) until:
+
+<LI>No Byte-readys are signalled for a short time (Y=$0C countdown).
+  Happens when the head runs into a sync mark (a short 4-byte sync mark
+  is sufficient for this). In this case the routine ends with CF=0,
+  Y=0 and the head being directly over a sync mark.<BR>
+  Should happen on the Track 36 Key Sector when wrong Bit rate is
+  set (in the real 1541, WinVice v1.21 does not support wrong
+  Bit rates the way we need it here).</LI>
+<BR><BR>
+<LI>Too many Byte-readys are signalled in sequence and the timer runs
+  out. The timer value [$1805]:=$FF is equivalent to about 0.08 seconds.
+  The 1541 runs at about 300r/m = 300r/60s = 5r/s = 1r/0.2s (i.e. 1
+  rotation per 0.2 seconds). So there has to be a sequence of data
+  bytes that fills about 40 percent of the Track for the timer to run
+  out (0.4*0.2=0.08). In this case the routine ends with CF=1. I've
+  <B>not</B> seen such a Track so far.</LI>
+
+<U>On Exit:</U> In each case [$0150]:= X is the number of counted
+byte-readys (until sync or timeout; modulo 256 of course). And
+AC:=[$1C01] (read current byte from head), VF:=0 (set byte was read).</P>
+
+
+JSR from <A HREF="R0480.html">$0489</A>, <A HREF="R0558.html">$056F</A>, Follow-up from <A HREF="R0480.html">$050A</A>:
+
+050D: A2 FF     LDX #$FF
+050F: 8E 05 18  STX <A HREF="M1805.html">$1805</A>      ; set Timer to 0.08 seconds
+0512: 38        SEC
+
+Jump from $051C:
+
+0513: AD 05 18  LDA <A HREF="M1805.html">$1805</A>
+0516: 10 0D     BPL $0525      ; branch if Timeout (no SYNC found in time)
+
+0518: E8        INX            ; increase byte-ready count (first INX increases to #$00)
+0519: B8        CLV
+051A: A0 0C     LDY #$0C       ; value for no-byte-ready countdown
+
+Jump from $051F:
+
+051C: 70 F5     BVS $0513      ; branch if byte-ready (no SYNC occurred)
+
+051E: 88        DEY            ; no byte-ready at moment, decrease counter
+051F: D0 FB     BNE $051C
+
+0521: 18        CLC
+0522: 8E 50 01  STX <A HREF="M0150.html">$0150</A>      ; [$0150]:= number of found byte-readys
+
+Jump from $0516:
+
+0525: AD 01 1C  LDA <A HREF="M1C01.html">$1C01</A>      ; read data byte from head (value never used!?)
+0528: B8        CLV
+0529: 60        RTS
+
+    <A HREF="R0480.html">Previous Page</A> / <A HREF="R052A.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R050D.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:34:49 GMT -->
+</HTML>

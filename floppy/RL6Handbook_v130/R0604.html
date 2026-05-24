@@ -1,0 +1,42 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0604.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:34:49 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R0587.html">Previous Page</A> <A HREF="R0625.html">Next Page</A>
+
+
+Routine $0604:   Recalibrate head onto Track
+
+<P>This routine moves the Step motor to a lower Halftrack and back to
+the upper Track. The loop is always executed twice: first cycle (loop
+variable number is even) moves the head to the lower Halftrack, second
+moves the head back to the Track. Finally the Drive LED is turned off.
+If [$C6]=0 then CF:=1 is returned (error).
+</P>
+
+JSR from <A HREF="R0480.html">$0484</A>, <A HREF="R052A.html">$054C</A>, Jump from $061B:
+
+0604: C6 C6     DEC <A HREF="M00C6.html">$C6</A>        ; initial value is [$C6]=9
+0606: F0 FA     BEQ <A HREF="R0587.html">$0602</A>      ; no tries left -> $0602 returns with CF:=1 (error)
+
+0608: A5 C6     LDA <A HREF="M00C6.html">$C6</A>
+060A: 29 03     AND #$03       ; $071F-Index: 8/7: 0/3, 6/5: 2/1, 4/3: 0/3, 2/1: 2/1
+060C: AA        TAX
+060D: BC 1F 07  LDY <A HREF="M071F.html">$071F,X</A>    ; Step motor movement ctrl: 8/7: FF/01, 6/5: 01/FF, 4/3: FF/01, 2/1: 01/FF
+                               ; FF = move half Track outwards, 01 = move half Track inwards
+0610: 20 C2 06  JSR <A HREF="R06B2.html">$06C2</A>      ; Move head custom number of Halftracks (+/- Y), set Bit rate.
+0613: AA        TAX
+0614: 20 F3 06  JSR <A HREF="R06F3.html">$06F3</A>      ; Bit shift memory area [$0420-($0420+X)], set [$79]:=$FD.
+0617: A5 C6     LDA <A HREF="M00C6.html">$C6</A>
+0619: 29 01     AND #$01
+061B: F0 E7     BEQ $0604      ; if [$C6] value is even -> first loop done -> run second/final loop
+
+061D: AD 00 1C  LDA <A HREF="M1C00.html">$1C00</A>
+0620: 29 F7     AND #$F7       ; $F7=11110111b: Drive LED = Off
+0622: 4C E8 06  JMP <A HREF="R06B2.html">$06E8</A>      ; turn Drive LED off, keep everything else (i.e. Bit rate)
+
+    <A HREF="R0587.html">Previous Page</A> / <A HREF="R0625.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0604.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 15:34:49 GMT -->
+</HTML>
