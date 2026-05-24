@@ -1,0 +1,77 @@
+<HTML>
+<!-- Mirrored from rittwage.com/RL6Handbook_v130/R052A.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 19:09:50 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R050D.html">Previous Page</A> <A HREF="R0558.html">Next Page</A>
+
+
+Routine $052A:   Find DOS reference sector on current track
+                 (integrity check; ~recalibrate head onto track before).
+
+<P>This routine searches for a sector with a relatively short data byte
+sequence enclosed by very long SYNC marks (max $18 tries).
+Routine $0733 finds the next following SYNC mark and measures it's length.
+Then for each following byte-ready the value 6 is subtracted from the length.
+If there are too many byte-readys it gets negative and the whole is tried
+again with the next SYNC mark. If there is no SYNC mark for $18 times the
+head gets repositioned onto the Track (max [$C6] times) and the routine
+is restarted (with $18 tries again).
+There's a very short Timer set while the byte-readys are "counted". The Timer
+runs out when the head runs into a long SYNC mark so no more byte-readys
+occur.
+The sector that is searched for is the hidden sector that resides on all
+Tracks. Register A has the measured "length" on jump to the $0764 routine
+(measured SYNC length minus number of byte-readys times 6).
+The $0764 routine sets [$11]:= (measured "length" - [$1D]), and puts the
+the Key for the current Track into [$0E] (~number of $7Bs in extra sector;
+from Track 36 Key Sector)
+</P>
+
+JSR from <A HREF="R0558.html">$055E</A>, Jump from $054F:
+
+052A: A9 18     LDA #$18
+052C: 85 C5     STA <A HREF="M00C5.html">$C5</A>        ; $18 tries to find the short extra sector on current Track
+
+Jump from $054A:
+
+052E: A2 1D     LDX #$1D       ; start value for following SYNC length measurement
+0530: 20 33 07  JSR <A HREF="R0733.html">$0733</A>      ; Measure length of next following SYNC mark (in X). CF:=0, [$BD]=A:=6 if SYNC found.
+0533: B0 17     BCS $054C      ; branch if no SYNC found -> reposition head and try again
+
+0535: 49 83     EOR #$83       ; (6 xor $83)= $85
+0537: 38        SEC            ; set error flag (will later be cleared if all ok)
+0538: 8D 05 1C  STA <A HREF="M1C05.html">$1C05</A>      ; set Timer [$1C05]:=$85
+053B: 8A        TXA
+
+Jump from $0541, $0546:
+
+053C: AC 05 1C  LDY <A HREF="M1C05.html">$1C05</A>
+053F: 10 11     BPL $0552
+
+0541: 50 F9     BVC $053C      ; loop while no byte-ready
+
+0543: E5 BD     SBC <A HREF="M00BD.html">$BD</A>        ; subtract [$BD]=6 for each byte-ready
+0545: B8        CLV
+0546: B0 F4     BCS $053C      ; loop while A>=0
+
+0548: C6 C5     DEC <A HREF="M00C5.html">$C5</A>
+054A: D0 E2     BNE $052E      ; branch to continue with next sector if still tries left
+
+JSR from <A HREF="R0415.html">$041D</A>, Jump from $0533:
+
+054C: 20 04 06  JSR <A HREF="R0604.html">$0604</A>      ; Recalibrate head onto Track
+054F: 90 D9     BCC $052A      ; branch if tries left ([$C6]>0) -> full restart with next sector
+
+0551: 60        RTS            ; error, no tries left
+
+Jump from $053F:
+
+0552: 88        DEY
+0553: 84 17     STY <A HREF="M0016.html">$17</A>
+0555: 4C 64 07  JMP <A HREF="R0745.html">$0764</A>
+
+    <A HREF="R050D.html">Previous Page</A> / <A HREF="R0558.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/RL6Handbook_v130/R052A.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 19:09:50 GMT -->
+</HTML>
