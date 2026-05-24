@@ -1,0 +1,82 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/MMAIN.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:47:02 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A>
+
+  +---------------------------------------------------------------------------------------------------------
+  |
+  | RapidLok6 Memory Index
+  |
+  +---------------------------------------------------------------------------------------------------------
+  |
+  | Zeropage:
+  |
+  |   <A HREF="M0001.html">$00-$05</A>       1541: Command code for buffer 0-5
+  |   <A HREF="M0001.html">$06-$11</A>       1541: Track and sector for buffer 0-5
+  |   <A HREF="M0012.html">$12-$13</A>       1541: Disk ID, drive 0
+  |   <A HREF="M0015.html">$15</A>           Default offset to start of file data in [$0400] buffer
+  |   <A HREF="M0016.html">$16-$17</A>       1541: Header block: ID
+  |   <A HREF="M001D.html">$1D</A>           Synchronization value (Track-to-Track / Track 36)
+  |   <A HREF="M0022.html">$22</A>           1541: Current track for drive 0
+  |   <A HREF="M0023.html">$23</A>           ID of sector to find & read
+  |   <A HREF="M0024.html">$24-$26</A>       Temp variables for decryptions
+  |   <A HREF="M0029.html">$29-$2A</A>       Data byte read from $6B data sector
+  |   <A HREF="M0030.html">$30-$31</A>       Buffer pointer for file transfer
+  |   <A HREF="M0038.html">$38-$39</A>       1541: Constants 7/8, ID mark for start of data/block block
+  |   <A HREF="M003A.html">$3A</A>           1541: Parity for data buffer
+  |   <A HREF="M003E.html">$3E</A>           1541: Active drive ($FF, if not active)
+  |   <A HREF="M0077.html">$77-$78</A>       Start track & sector ID of file to find & read (encrypted)
+  |   <A HREF="M0077.html">$79</A>           Number of parameters to copy in $0587 routine (negative, usually $FD=-3)
+  |   <A HREF="M0077.html">$7A</A>           Offset pointer for file transfer parameters
+  |   <A HREF="M0077.html">$7B</A>           File transfer of very first data sector starts in buffer [$7B*$100]
+  |   <A HREF="M0085.html">$85</A>           Loop variable for Key decryption
+  |   <A HREF="M009D.html">$9D</A>           1541: Pointer: Next byte in buffer 0-5 [0300-0700]
+  |   <A HREF="M00B5.html">$B5-$B6</A>       "M-W" body; Number of bytes left to be transferred to C64-client
+  |   <A HREF="M00B7.html">$B7</A>           "M-W" body; File transfer complete / additional shadow files there?
+  |   <A HREF="M00B8.html">$B8-$BA</A>       "M-W" body, dummy
+  |   <A HREF="M00BB.html">$BB</A>           "M-W" body; Control byte for head recalibration onto Track
+  |   <A HREF="M00BC.html">$BC</A>           "M-W" body, dummy
+  |   <A HREF="M00BD.html">$BD</A>           "M-W" body; Value =6 when used for locating DOS reference sector
+  |   <A HREF="M00BE.html">$BE-$BF</A>       "M-W" body; Tries to find $6B data sector & Track 36 Key decryption loop variables
+  |   <A HREF="M00C0.html">$C0-$C1</A>       "M-W" body, dummy
+  |   <A HREF="M00C2.html">$C2</A>           "M-W" body; Start/working/end Track of file to read & transfer
+  |   <A HREF="M00C3.html">$C3-$C4</A>       "M-W" body, dummy
+  |   <A HREF="M00C5.html">$C5</A>           "M-W" body; Number of tries to find short extra sector on Track (usually $18)
+  |   <A HREF="M00C6.html">$C6</A>           "M-W" body; Number of tries for head repositioning onto Track (usually 9)
+  |   <A HREF="M00C7.html">$C7-$C9</A>       "M-W" body; Keys for RapidLok routine decryption [$039C-$07FF]
+  |   <A HREF="M00D4.html">$D4</A>           Max errors before loader dies (initial value 4)
+  |   <A HREF="M00D5.html">$D5</A>           Temp storage for $6B data sector parity calculation (& Track 36 decryption)
+  |   <A HREF="M00D6.html">$D6-$D7</A>       Start track & sector ID of file to find & read
+  |   <A HREF="M00E7.html">$E7</A>           Number of tries to find $6B data sectors (usually 9)
+  |
+  | Extended Zeropage:
+  |
+  |   <A HREF="M0150.html">$0150</A>         Synchronization value (Track-to-Track) / Track 36 Key Sector length
+  |   <A HREF="M0151.html">$0151</A>         1st file to be loaded from disk: [$0151]=0, else summary of "Header block ID"
+  |   <A HREF="M0152.html">$0152-$01D1</A>   Track 36 Key Sector
+  |   <A HREF="M0290.html">$0290</A>         1541: Directory sector
+  |   <A HREF="M0294.html">$0294</A>         1541: Current buffer-index
+  |   <A HREF="M02A9.html">$02A9</A>         ???
+  |   <A HREF="M038A.html">$038A-$038B</A>   ??? (not used?, RL6 code area)
+  |   <A HREF="M038C.html">$038C-$03FF</A>   C64-client: Exit routines + general loading loop
+  |   <A HREF="M071F.html">$071F-$0722</A>   Number of steps for Step motor movement
+  |   <A HREF="M0723.html">$0723-$0724</A>   ??? (not used?, RL6 code area)
+  |
+  | VIA 1 (Serial Bus):
+  |
+  |   <A HREF="M1800.html">$1800</A>         Data Port B (ATN, CLOCK, DATA, Device #)
+  |   <A HREF="M1805.html">$1805</A>         Timer 1 High-Byte (Timeout Errors)
+  |
+  | VIA 2 (Motor and Head Control):
+  |
+  |   <A HREF="M1C00.html">$1C00</A>         Data Port B (SYNC, Motors, Bit Rates, LED)
+  |   <A HREF="M1C01.html">$1C01</A>         Data Port A (Data to/from head)
+  |   <A HREF="M1C05.html">$1C05</A>         Timer 1 High-Byte (IRQ Timer)
+  |   <A HREF="M1C07.html">$1C07</A>         Timer 1-Latch High-Byte (IRQ Timer)
+  |   <A HREF="M1C0C.html">$1C0C</A>         Peripheral Control Register
+  |
+  +---------------------------------------------------------------------------------------------------------
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/MMAIN.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:47:13 GMT -->
+</HTML>

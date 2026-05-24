@@ -1,0 +1,99 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0786.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:47:47 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R0745.html">Previous Page</A> <A HREF="RD005.html">Next Page</A>
+
+
+Routine $0786:   Prepare and run $0558 routine, afterwards RapidLok clean-up & exit.
+
+<P>The C64 is now waiting in the "general loading loop" for a signal to
+receive data. This routine prepares and calls the $0558 routine ("Locate
+Track 36 Key Sector, enforce Job #4 ($0700 Track 36 handler), run $0587
+file transfer management") and cleans up aftwerwards. Finally Job #1 is
+set to execute the $0400 exit routine.
+</P>
+
+Jump from <A HREF="R0300.html">$037C</A>:
+
+0786: 78        SEI
+0787: A6 0B     LDX <A HREF="M0001.html">$0B</A>
+0789: 4A        LSR A
+078A: A8        TAY
+078B: 20 7F 03  JSR <A HREF="R037F.html">$037F</A>      ; Bit shift memory area [$0420-($0420+X)], set [$79]:=$FD.
+078E: 49 0A     EOR #$0A
+0790: AA        TAX
+0791: B1 38     LDA (<A HREF="M0038.html">$38</A>),Y    ; A:=[$080B]=$08 check for memory card?
+0793: 10 01     BPL $0796
+
+0795: E8        INX
+
+Jump from $0793:
+
+0796: 86 13     STX <A HREF="M0012.html">$13</A>
+0798: 8E 00 18  STX <A HREF="M1800.html">$1800</A>      ; signal to C64-client
+079B: A9 88     LDA #$88
+079D: 8D A9 02  STA <A HREF="M02A9.html">$02A9</A>
+07A0: A9 09     LDA #$09
+07A2: 85 C6     STA <A HREF="M00C6.html">$C6</A>        ; [$C6]:=9 tries for head repositioning onto Track
+07A4: A9 80     LDA #$80
+07A6: 85 11     STA <A HREF="M0001.html">$11</A>        ; [$11]:=$80 wait loop countdown value ($06F3 routine)
+07A8: 85 0A     STA <A HREF="M0001.html">$0A</A>
+07AA: A5 D6     LDA <A HREF="M00D6.html">$D6</A>        ; Start track of file to find & read (encrypted)
+07AC: 29 3F     AND #$3F       ; $3F = 63d = 00111111b
+07AE: 18        CLC
+07AF: 69 13     ADC #$13
+07B1: C9 24     CMP #$24
+07B3: 90 08     BCC $07BD
+
+07B5: E9 24     SBC #$24
+07B7: 85 C2     STA <A HREF="M00C2.html">$C2</A>        ; [$C2] = Start/working/end Track of file to read & transfer
+07B9: A9 11     LDA #$11
+07BB: E5 C2     SBC <A HREF="M00C2.html">$C2</A>
+
+Jump from $07B3:
+
+07BD: 85 C2     STA <A HREF="M00C2.html">$C2</A>
+07BF: 18        CLC
+07C0: A5 16     LDA <A HREF="M0016.html">$16</A>
+07C2: 65 17     ADC <A HREF="M0016.html">$17</A>        ; summarize "Header block ID": [$16/$17]="P1" or "P2"
+07C4: AA        TAX
+07C5: 4D 51 01  EOR <A HREF="M0151.html">$0151</A>      ; 1st file to be loaded from disk: [$0151]=0
+07C8: 4D 52 01  EOR <A HREF="M0152.html">$0152</A>      ; 1st file to be loaded from disk: [$0152]=0, >2nd: [$0152]=$6B
+07CB: 8E 51 01  STX <A HREF="M0151.html">$0151</A>
+07CE: 84 16     STY <A HREF="M0016.html">$16</A>
+07D0: 84 D4     STY <A HREF="M00D4.html">$D4</A>
+07D2: 20 58 05  JSR <A HREF="R0558.html">$0558</A>      ; Locate Track 36 Key Sector, enforce Job #4 (execute $0700 Track 36 handler),
+                                 run file transfer management routine
+
+Jump from <A HREF="R0400.html">$0400</A>, <A HREF="R0745.html">$0783</A>:
+
+07D5: A9 12     LDA #$12       ; RapidLok clean-up starts here (reset memory and 1541) <<<<<<<<<<
+07D7: 78        SEI
+07D8: 85 13     STA <A HREF="M0012.html">$13</A>
+07DA: 20 BA 06  JSR <A HREF="R06B2.html">$06BA</A>      ; Step motor movement to other Track, set Bit rate
+07DD: A9 00     LDA #$00
+07DF: AA        TAX
+
+Jump from $07F2:
+
+07E0: 95 00     STA <A HREF="M0001.html">$00,X</A>      ; [$00-$FF]:=0
+07E2: 9D 00 03  STA $0300,X    ; [$0300-$03FF]:=0
+07E5: 9D 15 04  STA $0415,X    ; [$0415-$0514]:=0, [$0400-$0414] is RapidLok's exit-routine
+07E8: 9D 15 05  STA $0515,X    ; [$0515-$0614]:=0
+07EB: 9D 15 06  STA $0615,X    ; [$0615-$0714]:=0
+07EE: 9D E0 06  STA $06E0,X    ; [$06E0-$07DF]:=0
+07F1: E8        INX
+07F2: D0 EC     BNE $07E0
+
+07F4: A9 D0     LDA #$D0
+07F6: 85 01     STA <A HREF="M0001.html">$01</A>        ; set Job #1 to execute $0400 (RapidLok's exit-routine)
+07F8: A9 2C     LDA #$2C
+07FA: 8D 00 04  STA <A HREF="R0400.html">$0400</A>      ; change $0400 "JMP $07D5" to "BIT $07D5"
+07FD: 4C 22 EB  JMP <A HREF="REAA0.html">$EB22</A>      ; 1541 ROM: Power-up RESET routine
+
+    <A HREF="R0745.html">Previous Page</A> / <A HREF="RD005.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0786.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:47:47 GMT -->
+</HTML>

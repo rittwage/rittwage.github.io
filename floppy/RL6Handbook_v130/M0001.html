@@ -1,0 +1,65 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/M0001.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:47:45 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="MMAIN.html">Previous Page</A> <A HREF="M0012.html">Next Page</A>
+
+ $01-$04:   1541 - Command code for buffer 1-4
+ $06-$07:   1541 - Track and sector for buffer 0
+ $08-$09:   1541 - Track and sector for buffer 1
+ $0A-$0B:   1541 - Track and sector for buffer 2
+ $0C-$0D:   1541 - Track and sector for buffer 3
+ $0E-$0F:   1541 - Track and sector for buffer 4
+ $10-$11:   1541 - Track and sector for buffer 5 (unused)
+
+ --- Information taken from AAY1541 - http://www.the-dreams.de ----
+
+RapidLok-Reference:
+
+ STA $00,X  : <A HREF="R0786.html">$07E0</A> -> [$00-$FF]:=0
+ STY $00,X  : <A HREF="R07B0.html">$07EB</A>
+ LDA $00,X  : <A HREF="R07B0.html">$07EE</A>
+ LSR $01    : <A HREF="R0400.html">$0408</A>
+ STA $01    : <A HREF="R0587.html">$058A</A>
+ STA $01    : <A HREF="R0625.html">$0627</A>
+ LSR $01    : <A HREF="R0700.html">$0715</A>
+ STX $01    : <A HREF="R0745.html">$0752</A>
+ STA $01    : <A HREF="R0786.html">$07F6</A>
+ STY $04    : <A HREF="R07B0.html">$07FB</A>
+ STX $04    : <A HREF="R0300.html">$0304</A>
+ LDA $04    : <A HREF="R0300.html">$0307</A>
+ LDX $04    : <A HREF="R0415.html">$047D</A>
+ LDX $04    : <A HREF="R0558.html">$057A</A>
+ STA $04    : <A HREF="R06B2.html">$06B4</A>
+ STA $04    : <A HREF="R0700.html">$0703</A>
+ LDA ($05),Y: <A HREF="R0206.html">$020B</A>
+ STA ($05),Y: <A HREF="R0206.html">$0210</A>
+ JMP ($0005): <A HREF="R0206.html">$0215</A>
+ LDA ($05),Y: <A HREF="R0300.html">$0342</A>
+ STA ($05),Y: <A HREF="R0300.html">$0346</A>
+ STA $06    : <A HREF="R0206.html">$0209</A>
+ INC $06    : <A HREF="R0300.html">$0355</A>
+ STA $06,X  : <A HREF="R07B0.html">$07DE</A>
+ STY $07,X  : <A HREF="R07B0.html">$07DC</A>
+ CMP $08,X  : <A HREF="R07B0.html">$07B6</A>
+ ASL $0A    : <A HREF="R0587.html">$05AB</A>
+ LDA $0A    : <A HREF="R0745.html">$0745</A>
+ STA $0A    : <A HREF="R0786.html">$07A8</A>
+ STA $0B    : <A HREF="R0300.html">$0320</A>
+ LDX $0B    : <A HREF="R0786.html">$0787</A>
+ SBC $0E    : <A HREF="R0415.html">$0493***</A>
+ STA $0E    : <A HREF="R0745.html">$0774</A>
+ INC $10    : <A HREF="R0698.html">$06A3</A>
+ STX $10    : <A HREF="R06F3.html">$06F3</A>
+ DEC $10    : <A HREF="R06F3.html">$06FA</A>
+ LDX $11    : <A HREF="R06F3.html">$06F5</A>
+ STX $11    : <A HREF="R0745.html">$075B</A>
+ LDA $11    : <A HREF="R0745.html">$0762</A>
+ STA $11    : <A HREF="R0745.html">$0767</A>
+ STA $11    : <A HREF="R0786.html">$07A6</A>
+
+    <A HREF="MMAIN.html">Previous Page</A> / <A HREF="M0012.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/M0001.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:47:45 GMT -->
+</HTML>

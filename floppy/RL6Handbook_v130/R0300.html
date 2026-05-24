@@ -1,0 +1,113 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0300.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:47:46 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R0206.html">Previous Page</A> <A HREF="R037F.html">Next Page</A>
+
+
+Routine $0300:   Transfer "general loading loop" & "exit-routines" to C64
+
+<P>This routine primarily transfers the "general loading loop" & "exit-routines"
+to the C64. It also reads the final RapidLok sector 3 from Track 18 into the
+drive memory and decrypts [$039C-$07FF] (~ RapidLok code routines).
+</P>
+
+Jump from <A HREF="R0206.html">$0215</A>:
+
+0300: A2 80     LDX #$80
+0302: D0 02     BNE $0306
+
+Jump from $030C:
+
+0304: 86 04     STX <A HREF="M0001.html">$04</A>        ; set $80 = Read sector to Job #4 (Track 18 Sector 3)
+
+Jump from $0302, $0309:
+
+0306: 58        CLI            ; enable Interrupts for executing Job #4 (read T18 S3 to [$07xx])
+0307: A5 04     LDA <A HREF="M0001.html">$04</A>        ; get Job #4 status/result
+0309: 30 FB     BMI $0306
+
+030B: 4A        LSR A          ; A = Job result (=1 if all OK)
+030C: D0 F6     BNE $0304      ; branch to restart Job if something wrong with Job result
+
+030E: 78        SEI
+030F: 85 24     STA <A HREF="M0024.html">$24</A>        ; [$24]:=0
+0311: A2 11     LDX #$11
+
+Jump from $0319:
+
+0313: 95 B5     STA <A HREF="M00B5.html">$B5,X</A>      ; [$B5..$C5]:=0 ("M-W" data), [$C6..$C9]=$00,$9B,$36,$CA remains
+0315: 9D 08 02  STA $0208,X    ; [$0208..$0218]:=0 ($0206 routine, "M-W" data)
+0318: CA        DEX
+0319: 10 F8     BPL $0313
+
+031B: A2 01     LDX #$01
+031D: A5 C7     LDA <A HREF="M00C7.html">$C7</A>
+031F: 4A        LSR A
+0320: 85 0B     STA <A HREF="M0001.html">$0B</A>
+0322: AC 94 02  LDY <A HREF="M0294.html">$0294</A>      ; "Current buffer-index" (e.g. Y=2)
+
+Jump from $032E:
+
+0325: B5 77     LDA <A HREF="M0077.html">$77,X</A>      ; start track & sector ID of file to find & read (encrypted)
+0327: 59 17 07  EOR $0717,Y
+032A: 95 D6     STA <A HREF="M00D6.html">$D6,X</A>      ; [$D6-$D7]:= [$77-$78] xor [$0718-$0719] (if e.g. Y=2)
+032C: 88        DEY
+032D: CA        DEX
+032E: 10 F5     BPL $0325
+
+0330: 29 80     AND #$80
+0332: 4A        LSR A
+0333: 4A        LSR A
+0334: 4A        LSR A
+0335: 4D B5 03  EOR <A HREF="M038C.html">$03B5</A>      ; [$03B5] = CLI command at $02DF in $02B6 "exit-routine" (C64)
+0338: 8D B5 03  STA <A HREF="M038C.html">$03B5</A>      ; [$03B5]:= [$03B5] xor (([$D7] and #$80) >> 3)
+033B: A2 03     LDX #$03
+033D: 86 31     STX <A HREF="M0030.html">$31</A>        ; hi address for following file transfer in $0625 routine
+033F: E8        INX
+0340: A0 9C     LDY #$9C
+
+Jump from $0353, $0358:
+
+0342: B1 05     LDA (<A HREF="M0001.html">$05</A>),Y
+0344: 45 C7     EOR <A HREF="M00C7.html">$C7</A>
+0346: 91 05     STA (<A HREF="M0001.html">$05</A>),Y    ; decrypt [$039C-$07FF]
+0348: 66 24     ROR <A HREF="M0024.html">$24</A>
+034A: 26 C9     ROL <A HREF="M00C7.html">$C9</A>
+034C: 26 C8     ROL <A HREF="M00C7.html">$C8</A>
+034E: 26 C7     ROL <A HREF="M00C7.html">$C7</A>
+0350: 26 24     ROL <A HREF="M0024.html">$24</A>
+0352: C8        INY
+0353: D0 ED     BNE $0342
+
+0355: E6 06     INC <A HREF="M0001.html">$06</A>
+0357: CA        DEX
+0358: 10 E8     BPL $0342
+
+035A: 86 C7     STX <A HREF="M00C7.html">$C7</A>        ; [$C7]:=$FF
+035C: 86 C8     STX <A HREF="M00C7.html">$C8</A>        ; [$C8]:=$FF
+035E: 86 C9     STX <A HREF="M00C7.html">$C9</A>        ; [$C9]:=$FF
+0360: A0 74     LDY #$74
+0362: 84 B5     STY <A HREF="M00B5.html">$B5</A>
+0364: A9 01     LDA #$01
+0366: 85 B6     STA <A HREF="M00B5.html">$B6</A>        ; [$B5-$B6]:=$0174 (length of "general loading loop" & "exit-routines")
+0368: 4A        LSR A
+
+Jump from $0370:
+
+0369: 99 F3 02  STA $02F3,Y    ; [$02F3-$0367]:=0, disable potential hostile patch code there?
+036C: 99 2A 02  STA $022A,Y    ; [$022A-$029E]:=0, disable potential hostile patch code there?
+036F: 88        DEY
+0370: 10 F7     BPL $0369
+
+0372: A0 8C     LDY #$8C       ; defines memory start for file transfer: ($30),Y = $038C
+0374: 20 25 06  JSR <A HREF="R0625.html">$0625</A>      ; File transfer: [$B5-$B6] bytes starting at ($30),Y = $038C
+0377: A9 08     LDA #$08
+0379: 8D 00 18  STA <A HREF="M1800.html">$1800</A>      ; signal for C64-client to exit $0200 transfer-routine
+037C: 4C 86 07  JMP <A HREF="R0786.html">$0786</A>
+
+    <A HREF="R0206.html">Previous Page</A> / <A HREF="R037F.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0300.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:47:46 GMT -->
+</HTML>

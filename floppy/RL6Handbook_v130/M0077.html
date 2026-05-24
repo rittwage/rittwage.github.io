@@ -1,0 +1,36 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/M0077.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:47:45 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="M003E.html">Previous Page</A> <A HREF="M0085.html">Next Page</A>
+
+ $77-$78:   Start track & sector ID of file to find & read (encrypted)
+ $79:       Number of parameters to copy in $0587 routine (negative, usually $FD=-3)
+            Initial value from Directory entry is not used.
+ $7A:       Offset pointer for file transfer parameters.
+            Initial value for very first data sector is obtained from Directory entry.
+ $7B:       File transfer of very first data sector starts in buffer [$7B*$100]
+            (only buffer [$0300] or [$0400]).
+
+The 5 above values are obtained from the Track 18 Directory entry of the
+file to be loaded. [$7A], [$7B] are not encrypted (e.g. take a look at the
+Directory of a D64 image).
+
+RapidLok-Reference:
+
+ LDA $77,X  : <A HREF="R0300.html">$0325</A>
+ STA $77,X  : <A HREF="R07B0.html">$07D0</A>
+ STX $79    : <A HREF="R037F.html">$0387</A>
+ LDX $79    : <A HREF="R0587.html">$05B9</A>
+ STX $79    : <A HREF="R0587.html">$05C2</A>
+ STA $79    : <A HREF="R0587.html">$05FE</A>
+ STA $7A    : <A HREF="R0587.html">$05B3</A>
+ LDY $7A    : <A HREF="R0587.html">$05B7</A>
+ STY $7A    : <A HREF="R0587.html">$05C5</A>
+ LDX $7B    : <A HREF="R0587.html">$05A9</A>
+
+    <A HREF="M003E.html">Previous Page</A> / <A HREF="M0085.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/M0077.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:47:45 GMT -->
+</HTML>

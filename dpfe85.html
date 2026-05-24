@@ -1,6 +1,6 @@
 <!DOCTYPE html><html>
 
-<!-- Mirrored from rittwage.com/ by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:46:11 GMT -->
+<!-- Mirrored from rittwage.com/dp.php?pg=mame by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:46:16 GMT -->
 <!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
 <head>
 <script src="bootstrap/js/bootstrap.min.js"></script><link href="bootstrap/bootswatch/slate/bootstrap.css" rel="stylesheet" media="screen"><title>rittwage.com</title>
@@ -40,9 +40,12 @@
 
 <div class="col-8">
 
-<div class="card"><div class="card-header text-white bg-primary">Home/Welcome</div><div class="card-block">These pages represent a collection of my interests, as well as past and present projects.  I continue to develop several small games and tools that I always wanted to have and use myself.  Possibly they'll interest others, too.<br/><br/>
-I grew up in the 8-bit computing era during the reign of the Commodore 64.  I've made small contributions to the emulation community since my first Centipede emulator (VPCB) released in late 1996.  This was before MAME existed and Dave Spicer had just stunned everyone with the first arcade game emulator, DASARCADE (which later evolved into SPARCADE).<br/><br/>
-<b>Pete Rittwage</b></div></div>
+<div class="card"><div class="card-header text-white bg-primary">MAME Patches</div><div class="card-block"><b>Donkey Kong and DK Jr. Sound Fixes</b>
+<p>The sound emulation in Donkey Kong has been imperfect for a while now and it always bugged me, since it's one of my favorite arcade games. I first attempted to fix this by dynamically altering the Machine->sample_rate in a certain pattern when the sounds are played, but that resulted in other sounds being affected and was unacceptable. Instead, after asking on the 'mame.net' forums someone posted that Derrick Renauld had done some work earlier on alternating between different samples. Well, that works, but isn't accurate either, because the game doesn't play the different pitched sounds in alternating 1-2-3 order like his code did. I found an interesting site on the net which has recordings of arcade games done by this gentleman in the early 80's. It's amusing listening, but more importantly it has a very good recording of someone playing DK. I was able to discern (mostly) the pattern the samples are played during Mario's (jumpman's) walking sequence. It is still not 100%, because the pattern in the real game starts over when you pause or change directions, but it's close enough that you won't notice. It's MUCH better than playing the same sample over and over again.</p>
+
+<p>I applied the same fixed to DK Junior, but I don't have individual samples of the 2 modulated sounds (walk and climb) so the extra samples are pitch-shifted to simulate it. Climbing sounds fairly accurate, but walking is not. If you have good samples of Junior walking, I'd love a copy to fix this.</p>
+
+<p>As of version 0.85, MAME has included my patches and samples, so there is no longer a download here.</p></div></div>
 
 </div>
 
@@ -59,8 +62,8 @@ I grew up in the 8-bit computing era during the reign of the Commodore 64.  I've
 
 <!-- rittwage.com -->
 
-<!-- 37 queries in 0 seconds, playa -->
-<!-- End time: 1779633971 -->
-<!-- Mirrored from rittwage.com/ by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:46:15 GMT -->
+<!-- 39 queries in 0 seconds, playa -->
+<!-- End time: 1779633973 -->
+<!-- Mirrored from rittwage.com/dp.php?pg=mame by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 24 May 2026 14:46:16 GMT -->
 </html>
 
