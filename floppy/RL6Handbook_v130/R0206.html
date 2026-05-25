@@ -1,0 +1,39 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0206.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:27 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R07B0.html">Previous Page</A> <A HREF="R0300.html">Next Page</A>
+
+
+Routine $0206:   "M-W" command body, decrypt [$0300-$0380] code area
+
+<P>Memory commands ("M-W", "M-E") are cached in the 1541 [$0200-$0229]
+"Buffer for command string", starting at $0200 for each command. The "M-E"
+command was 5 bytes long and overwrote the first 5 bytes of the "M-W" command
+which are no longer needed as the "M-W" command was already executed
+($15 data bytes copied to [$B5-$C9]). So the body of the "M-W" command
+remains at $0206-$0217: our routine here. This routine enables Interrupts
+again but Job #4's execution is not enforced here. Then [$0300-$0380] is
+decrypted and executed.</P>
+	
+Jump from <A HREF="R07B0.html">$07FD</A>:
+
+0206: 58        CLI            ; enable Interrupts for executing Job #4 (read Sector 3 to [$07xx])
+0207: 49 36     EOR #$36       ; XOR with parity of last read data buffer (Sector 15), should be $35
+0209: 85 06     STA <A HREF="M0001.html">$06</A>        ; [$06]:= ($35 xor $36) = #$03, so [$05/$06] points to $0300
+
+Jump from $0213:
+
+020B: B1 05     LDA (<A HREF="M0001.html">$05</A>),Y
+020D: 59 17 04  EOR $0417,Y
+0210: 91 05     STA (<A HREF="M0001.html">$05</A>),Y    ; decryption, [$0300-$0380]:= [$0300-$0380] xor [$0417-$0497]
+0212: 88        DEY
+0213: 10 F6     BPL $020B
+
+0215: 6C 05 00  JMP (<A HREF="M0001.html">$0005</A>)    ; jump to <A HREF="R0300.html">$0300</A> (see above $0209 statement)
+
+    <A HREF="R07B0.html">Previous Page</A> / <A HREF="R0300.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0206.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:27 GMT -->
+</HTML>

@@ -1,0 +1,197 @@
+<HTML>
+<!-- Mirrored from rittwage.com/RL6Handbook_v130/R0415.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:34 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R0400.html">Previous Page</A> <A HREF="R0480.html">Next Page</A>
+
+
+Routine $0415:   Read specific $6B data sector, RL integrity checks. CF=0 if all ok.
+
+<P>This routine finds, reads and decrypts a specific $6B data sector to
+[$047D-$04FF,$0300-$03FF]. The end of this routine gets overwritten with
+a custom end each sector begins with. There are simple custom ends and
+such that are doing integrity checks of the RapidLok code (checksum) and
+disk. Some examples are given below. On exit the actual file data starts
+at $0488 plus Akku register value.
+
+The value of [$23] is the sector ID of the sector to be found. When the
+correct sector was found the sector ID gets increased (by 1). It's set
+to 0 (zero) if the next sector of the file is on another Track.
+
+All RapidLok data sectors are protected by parity checksum. So we'll
+notice when a sector/disk is faulty.
+
+The routine returns CF=0 if the correct sector was read and integrity
+checks passed successfully (if there were any checks).
+</P>
+
+Jump from $0439, $047B, <A HREF="R0480.html">$0487</A>:
+
+0415: C6 BE     DEC <A HREF="M00BE.html">$BE</A>        ; decrease trial count (initialized below at $0422: [$BE]:=$24)
+0417: 10 0D     BPL $0426
+
+Jump from $042D:
+
+0419: C6 E7     DEC <A HREF="M00E7.html">$E7</A>        ; initial value 9
+041B: 30 E3     BMI <A HREF="R0400.html">$0400</A>      ; if no tries left ($BE/$E7): branch to exit of RapidLok - <B>Avoid this!!!</B>
+
+041D: 20 4C 05  JSR <A HREF="R052A.html">$054C</A>      ; Find DOS reference sector on current Track (integrity check).
+0420: B0 DE     BCS <A HREF="R0400.html">$0400</A>      ; if no tries left ([$C6]): branch to exit of RapidLok - <B>Avoid this!!!</B>
+
+JSR from <A HREF="R0587.html">$05A4</A>:
+
+0422: A9 24     LDA #$24
+0424: 85 BE     STA <A HREF="M00BE.html">$BE</A>        ; $24 tries to find a $6B data sector
+
+Jump from $0417:
+
+0426: A5 16     LDA <A HREF="M0016.html">$16</A>
+0428: 85 31     STA <A HREF="M0030.html">$31</A>        ; hi address for file transfer in $0625 routine
+042A: 20 78 06  JSR <A HREF="R0678.html">$0678</A>      ; wait for next $6B data sector SYNC mark. CF:=0 if found. / Set [<A HREF="M0015.html">$15</A>].
+042D: B0 EA     BCS $0419      ;   branch if <U>not</U> found
+
+042F: A4 17     LDY <A HREF="M0016.html">$17</A>
+0431: A9 6B     LDA #$6B       ; data sector ID
+0433: 50 FE     BVC $0433      ; wait for byte-ready
+
+0435: B8        CLV
+0436: 4D 01 1C  EOR <A HREF="M1C01.html">$1C01</A>      ; [$1C01]=$6B if data sector really found ($6B xor $6B = 0)
+0439: D0 DA     BNE $0415      ; branch if <U>not</U> found
+
+Jump from $046B, $0477:
+
+043B: 50 FE     BVC $043B      ; wait for byte-ready
+
+043D: B8        CLV
+043E: AD 01 1C  LDA <A HREF="M1C01.html">$1C01</A>      ; read data-byte from head
+0441: AA        TAX
+0442: 29 49     AND #$49
+0444: 85 29     STA <A HREF="M0029.html">$29</A>
+0446: 8A        TXA
+0447: 29 24     AND #$24
+0449: 85 2A     STA <A HREF="M0029.html">$2A</A>
+044B: A9 B6     LDA #$B6
+044D: 50 FE     BVC $044D      ; wait for byte-ready
+
+044F: 2D 01 1C  AND $1C01      ; data-byte from head
+0452: 65 29     ADC <A HREF="M0029.html">$29</A>
+0454: 91 30     STA (<A HREF="M0030.html">$30</A>),Y
+0456: 45 D5     EOR <A HREF="M00D5.html">$D5</A>
+0458: 85 D5     STA <A HREF="M00D5.html">$D5</A>        ; [$D5] = temp storage for $6B data sector parity calculation
+045A: C8        INY
+045B: A9 DB     LDA #$DB
+045D: 50 FE     BVC $045D      ; wait for byte-ready
+
+045F: 2D 01 1C  AND <A HREF="M1C01.html">$1C01</A>      ; data-byte from head
+0462: 65 2A     ADC <A HREF="M0029.html">$2A</A>
+0464: 91 30     STA (<A HREF="M0030.html">$30</A>),Y
+0466: 45 D5     EOR <A HREF="M00D5.html">$D5</A>
+0468: 85 D5     STA <A HREF="M00D5.html">$D5</A>        ; [$D5] = temp storage for $6B data sector parity calculation
+046A: C8        INY
+046B: D0 CE     BNE $043B
+
+046D: A2 03     LDX #$03
+046F: E4 31     CPX <A HREF="M0030.html">$31</A>        ; hi address for file transfer in $0625 routine
+0471: B8        CLV
+0472: 86 31     STX <A HREF="M0030.html">$31</A>        ; hi address for file transfer in $0625 routine
+0474: AE 01 1C  LDX <A HREF="M1C01.html">$1C01</A>      ; read data-byte from head
+0477: 90 C2     BCC $043B
+
+0479: 18        CLC            ; <B>CF:=0</B>
+047A: A8        TAY            ; sector parity must be 0 (zero)
+047B: D0 98     BNE $0415      ; branch if sector is faulty (should never branch!)
+///////////////////////////
+047D: A6 04     LDX <A HREF="M0001.html">$04</A>        ; "normal" exit, never used, always overwritten
+047F: 60        RTS
+///////////////////////////
+047D: A6 AB     LDX $AB        ; dummy command (#$AB = parity of current data sector)
+047F: A9 08     LDA #$08       ; current sector ID (varies of course)
+0481: 45 23     EOR <A HREF="M0023.html">$23</A>        ; correct sector found if [$23]=ID
+0483: D0 90     BNE $0415      ;   branch if <U>not</U> correct sector found
+0485: E6 23     INC <A HREF="M0023.html">$23</A>        ; set ID of next sector
+0487: 60        RTS            ; A=0 -> file data starts at $0488+$0=$0488 (usually [<A HREF="M0015.html">$15</A>]=$88), except 1st sector
+///////////////////////////
+047D: A6 F7     LDX $F7        ; dummy command (#$F7 = parity of current data sector)
+047F: A9 0B     LDA #$0B       ; current sector ID (varies of course)
+0481: 45 23     EOR <A HREF="M0023.html">$23</A>        ; correct sector found if [$23]=ID
+0483: D0 90     BNE $0415      ;   branch if <U>not</U> correct sector found
+0485: 85 23     STA <A HREF="M0023.html">$23</A>        ; set [$23]:=0 if file continues on other Track
+0487: 60        RTS            ; A=0 -> file data starts at $0488+$0=$0488 (usually [<A HREF="M0015.html">$15</A>]=$88), except 1st sector
+///////////////////////////
+047D: A6 3E     LDX $3E        ; dummy command (#$3E = parity of current data sector)
+047F: A2 01     LDX #$01       ; current sector ID (varies of course)
+0481: E4 23     CPX <A HREF="M0023.html">$23</A>        ; correct sector found if [$23]=ID
+0483: D0 90     BNE $0415      ;   branch if <U>not</U> correct sector found
+0485: E6 23     INC <A HREF="M0023.html">$23</A>        ; set ID of next sector
+0487: AA        TAX
+0488: 20 34 07  JSR <A HREF="R0733.html">$0734</A>      ; measure length of next following SYNC mark (in X); Y:=0
+048B: E0 60     CPX #$60
+048D: B0 14     BCS $04A3      ; all ok if X = SYNC length < $60, so <U>don't</U> branch here!
+
+048F: C8        INY            ; start following data byte count with Y=1
+0490: 20 26 07  JSR <A HREF="R0725.html">$0726</A>      ; counts the $7Bs (returned in A) until next SYNC. CF:=1.
+0493: E5 0E     SBC <A HREF="M0001.html">$0E</A>        ; subtract Key for current Track
+0495: 90 02     BCC $0499      ; branch if A<[$0E] (result negative)
+
+0497: 49 FF     EOR #$FF       ; it's A>=[$0E] (result positive), CF=1 -> A:= -A
+
+Jump from $0495:
+
+0499: 69 04     ADC #$04
+049B: 30 06     BMI $04A3      ; all ok if: [$0E]-4 <= #7Bs <= [$0E]+4, so <U>don't</U> branch here!
+
+049D: A5 1D     LDA <A HREF="M001D.html">$1D</A>        ; [$1D] = number of data bytes after Track 36 Key Sector Keys,
+049F: C9 20     CMP #$20       ;         all ok if [$1D]<$20 (at wrong bit rate).
+04A1: 90 03     BCC $04A6      ;         -> this BCC <U>must</U> branch! -> <U>RTS with CF=0</U>
+
+Jump from $048D, $049B:
+
+04A3: 0E 40 04  ASL $0440      ; Kills the head read command at $043E. <B>Avoid this!!!</B>
+
+Jump from $04A1:
+
+04A6: A9 21     LDA #$21       ; file data starts at $0400+$88+$21=$04A9 (usually [<A HREF="M0015.html">$15</A>]=$88), except 1st sector
+04A8: 60        RTS
+///////////////////////////
+047D: A6 9F     LDX $9F        ; dummy command (#$9F = parity of current data sector)
+047F: A0 02     LDY #$02       ; current sector ID (varies of course)
+0481: C4 23     CPY <A HREF="M0023.html">$23</A>        ; correct sector found if [$23]=ID
+0483: D0 90     BNE $0415      ;   branch if <U>not</U> correct sector found
+
+0485: E6 23     INC <A HREF="M0023.html">$23</A>        ; set ID of next sector
+0487: A0 7C     LDY #$7C
+
+Jump from $048E, $0495:
+
+0489: 79 00 04  ADC $0400,Y    ; Codesegment-Checksum!
+048C: 88        DEY            ;   adds every second byte in range
+048D: 88        DEY            ;     [$0402-$047C,$0500-$07FE] (odd addresses skipped)
+048E: D0 F9     BNE $0489      ;
+                               ;
+0490: EE 8B 04  INC $048B      ; increases $0489-buffer-address: $0400, $0500, ... , ($0800)
+0493: C6 31     DEC <A HREF="M0030.html">$31</A>        ; hi address for file transfer in $0625 routine
+0495: 10 F2     BPL $0489      ;
+
+0497: E9 E0     SBC #$E0       ; Checksum must be #$E0+1
+0499: D0 04     BNE $049F      ;   so branch is <U>not</U> taken!
+
+049B: A5 1D     LDA <A HREF="M001D.html">$1D</A>        ; [$1D] = number of data bytes after Track 36 Key Sector Keys,
+049D: 10 06     BPL $04A5      ;         must be >= 0, so branch <U>is</U> taken!
+
+Jump from $0499:
+
+049F: 0E 40 04  ASL $0440      ; Kills the head read command at $043E. <B>Avoid this!!!</B>
+04A2: 8C 6A 01  STY <A HREF="M0152.html">$016A</A>
+
+Jump from $049D:
+
+04A5: A9 21     LDA #$21       ; file data starts at $0400+$88+$21=$04A9 (usually [<A HREF="M0015.html">$15</A>]=$88), except 1st sector
+04A7: 18        CLC
+04A8: 60        RTS            ; RTS with CF=0
+///////////////////////////
+
+    <A HREF="R0403.html">Previous Page</A> / <A HREF="R0480.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/RL6Handbook_v130/R0415.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:34 GMT -->
+</HTML>

@@ -1,0 +1,142 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0480.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:28 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R0415.html">Previous Page</A> <A HREF="R050D.html">Next Page</A>
+
+
+Routine $0480:   Retrieve 35 keys from Track 36 Key Sector -> [$0153-$0174]
+
+<P>This routine is called when the head is on Track 36. Entry point
+is $0489. It waits for the next SYNC (the very long one) and the
+following Key Sector data to begin. It reads the first $7F data bytes,
+extracts the 35 keys, decrypts and stores them to [$0153-$0174].
+While the decryption takes place the disk rotates some times under
+the head. You can see this when you keep an eye on the [$1C01] values:
+it gets successively updated with read bytes from the head.
+The routine ends by running into the $050D routine (at <U>wrong</U> Bit rate),
+counting the byte-readys (->[$0150]) until next SYNC mark (the very long
+one again). CF:=0 as the SYNC is found, so the $0713-BCS will/must <U>not</U>
+branch when we return to the calling $0700 routine.
+The [$0150] value will not be changed again and is later used in the
+$0415 routine to check the integrity of the Key Sector: it must be
+0 <= [$0150] < $20.
+As the correct timing seems a bit too difficult at this time, we'll
+patch the [$0150] value later.
+</P>
+
+Jump from $04CE:
+
+0480: 46 BB     LSR <A HREF="M00BB.html">$BB</A>        ; Control byte for head recalibration onto Track
+0482: B0 05     BCS $0489      ;          (initial value set at <A HREF="R0700.html">$0709</A>: $DB=11011011b)
+
+Jump from $048C:
+
+0484: 20 04 06  JSR <A HREF="R0604.html">$0604</A>      ; Recalibrate head onto Track
+0487: B0 8C     BCS <A HREF="R0415.html">$0415</A>      ; branch if CF=1 ([$C6]=0) makes no sense -> <B>Avoid this!!!</B>
+
+JSR from <A HREF="R0700.html">$0710</A>:
+
+0489: 20 0D 05  JSR <A HREF="R050D.html">$050D</A>      ; Count byte-readys (->[$0150]) until next SYNC mark. CF:=0 if SYNC found, AC:=[$1C01].
+048C: B0 F6     BCS $0484      ; branch if no SYNC found -> reposition head and try to find again
+
+Jump from $0498:
+
+048E: 50 FE     BVC $048E      ; wait for byte-ready (Key Sector data)
+
+0490: B8        CLV            ; Key Sector data begins here <<<<<
+0491: AD 01 1C  LDA <A HREF="M1C01.html">$1C01</A>      ; read data-byte from head
+0494: 99 52 01  STA <A HREF="M0152.html">$0152,Y</A>    ; [$0152-$01D1]:= first $7F data-bytes (keys) from Key Sector
+0497: C8        INY
+0498: 10 F4     BPL $048E
+
+049A: A9 6B     LDA #$6B
+049C: A0 00     LDY #$00
+
+Jump from $04A4:
+
+049E: 59 52 01  EOR <A HREF="M0152.html">$0152,Y</A>    ; xor $6B with all bytes in [$0152-$0185]
+04A1: C8        INY
+04A2: C0 34     CPY #$34
+04A4: D0 F8     BNE $049E
+
+04A6: 85 D5     STA <A HREF="M00D5.html">$D5</A>        ; [$D5]:= calculated checksum
+04A8: AE 86 01  LDX <A HREF="M0152.html">$0186</A>
+04AB: AD 87 01  LDA <A HREF="M0152.html">$0187</A>
+04AE: A8        TAY
+04AF: 29 03     AND #$03
+04B1: 85 24     STA <A HREF="M0024.html">$24</A>
+04B3: 98        TYA
+04B4: 4A        LSR A
+04B5: 29 0C     AND #$0C
+04B7: 05 24     ORA <A HREF="M0024.html">$24</A>
+04B9: 85 24     STA <A HREF="M0024.html">$24</A>
+04BB: 8A        TXA
+04BC: 0A        ASL A
+04BD: 0A        ASL A
+04BE: 0A        ASL A
+04BF: AA        TAX
+04C0: 29 C0     AND #$C0
+04C2: 05 24     ORA <A HREF="M0024.html">$24</A>
+04C4: 85 24     STA <A HREF="M0024.html">$24</A>
+04C6: 8A        TXA
+04C7: 29 18     AND #$18
+04C9: 0A        ASL A
+04CA: 05 24     ORA <A HREF="M0024.html">$24</A>
+04CC: 45 D5     EOR <A HREF="M00D5.html">$D5</A>
+04CE: D0 B0     BNE $0480
+
+04D0: 85 BF     STA <A HREF="M00BE.html">$BF</A>
+04D2: 85 BE     STA <A HREF="M00BE.html">$BE</A>
+
+Jump from $0503:
+
+04D4: A2 02     LDX #$02       ; key decryption starts here <<<<<
+04D6: 86 85     STX <A HREF="M0085.html">$85</A>
+04D8: A4 BF     LDY <A HREF="M00BE.html">$BF</A>
+
+Jump from $04E1:
+
+04DA: B9 53 01  LDA <A HREF="M0152.html">$0153,Y</A>    ; get encrypted key
+04DD: 95 24     STA <A HREF="M0024.html">$24,X</A>      ; [$24-$26]:= 3 encrypted keys
+04DF: C8        INY
+04E0: CA        DEX
+04E1: 10 F7     BPL $04DA
+
+04E3: 84 BF     STY <A HREF="M00BE.html">$BF</A>
+04E5: A4 BE     LDY <A HREF="M00BE.html">$BE</A>
+
+Jump from $04FD:
+
+04E7: A2 04     LDX #$04
+
+Jump from $04F5:
+
+04E9: 20 18 07  JSR <A HREF="R0718.html">$0718</A>       ; bit shift [$24-$26]
+04EC: 20 18 07  JSR <A HREF="R0718.html">$0718</A>       ; bit shift [$24-$26]
+04EF: 2A        ROL A
+04F0: 20 18 07  JSR <A HREF="R0718.html">$0718</A>       ; bit shift [$24-$26]
+04F3: 2A        ROL A
+04F4: CA        DEX
+04F5: D0 F2     BNE $04E9
+
+04F7: 99 53 01  STA <A HREF="M0152.html">$0153,Y</A>    ; [$0153-$0174]:= 35 decrypted keys
+04FA: C8        INY
+04FB: C6 85     DEC <A HREF="M0085.html">$85</A>
+04FD: D0 E8     BNE $04E7
+
+04FF: C0 22     CPY #$22
+0501: 84 BE     STY <A HREF="M00BE.html">$BE</A>
+0503: D0 CF     BNE $04D4      ; decrypt next keys <<<<<
+
+0505: B8        CLV
+0506: 50 FE     BVC $0506      ; wait for byte-ready
+
+0508: A9 66     LDA #$66       ; $66=01100110b
+050A: 8D 00 1C  STA <A HREF="M1C00.html">$1C00</A>      ; set Bit rate "11 = 307692 Bit/s".
+
+    <A HREF="R0415.html">Previous Page</A> / <A HREF="R050D.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0480.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:28 GMT -->
+</HTML>

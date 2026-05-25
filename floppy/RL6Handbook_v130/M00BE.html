@@ -1,0 +1,26 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/M00BE.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:26 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="M00BD.html">Previous Page</A> <A HREF="M00C0.html">Next Page</A>
+
+ $BE:       "M-W" body; Number of tries to find a $6B data sector (usually $24)
+ $BE-$BF:   "M-W" body; Loop variables for Track 36 Key decryption
+
+RapidLok-Reference:
+
+ STA $B5,X  : <A HREF="R0300.html">$0313</A> -> [$B5..$C5]:=0 are set here.
+ DEC $BE    : <A HREF="R0415.html">$0415</A>
+ STA $BE    : <A HREF="R0415.html">$0424</A>
+ STA $BE    : <A HREF="R0480.html">$04D2</A>
+ LDY $BE    : <A HREF="R0480.html">$04E5</A>
+ STY $BE    : <A HREF="R0480.html">$0501</A>
+ STA $BF    : <A HREF="R0480.html">$04D0</A>
+ LDY $BF    : <A HREF="R0480.html">$04D8</A>
+ STY $BF    : <A HREF="R0480.html">$04E3</A>
+
+    <A HREF="M00BD.html">Previous Page</A> / <A HREF="M00C0.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/M00BE.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:26 GMT -->
+</HTML>

@@ -1,0 +1,38 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0400.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:27 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R037F.html">Previous Page</A> <A HREF="R0415.html">Next Page</A>
+
+
+Routine $0400:   Exit routine (memory clean-up & init 1541)
+
+<P>This routine has two purposes. It gets called from various locations
+when a timer runs out or an error occurs: it passes execution to the $07D5
+clean up which modifies the $0400 JMP into a dummy BIT command and setting
+a Job to execute the modified $0400 exit routine (finishing the clean up).
+</P>
+
+Jump from <A HREF="R0415.html">$041B</A>, <A HREF="R0415.html">$0420</A>, $D0-Execute Job #1 from <A HREF="R0587.html">$058A</A>, <A HREF="R0625.html">$0627</A>, <A HREF="R0745.html">$0752</A>:
+
+0400: 4C D5 07  JMP <A HREF="R0786.html">$07D5</A>       ; $07D5 is RapidLok's clean-up routine (reset memory and 1541)
+///////////////////////////
+
+$D0-Execute Job #1 from <A HREF="R0786.html">$07F6</A>:
+
+0400: 2C D5 07  BIT <A HREF="R0786.html">$07D5</A>       ; JMP changed to dummy BIT at <A HREF="R0786.html">$07FA</A> (end of RapidLok's clean-up routine)
+///////////////////////////
+0403: A9 C6     LDA #$C6
+0405: 8D 00 1C  STA <A HREF="M1C00.html">$1C00</A>       ; $C6=11000110b: Bit rate "10 = 285714 Bit/s", Drive LED on, Drive Motor on
+0408: 46 01     LSR <A HREF="M0001.html">$01</A>
+040A: E6 3E     INC <A HREF="M003e-2.html">$3E</A>
+040C: 20 05 D0  JSR <A HREF="RD005.html">$D005</A>       ; 1541 ROM: Perform [I] - Initalise command
+040F: A2 45     LDX #$45
+0411: 9A        TXS
+0412: 4C C5 EB  JMP <A HREF="REAA0.html">$EBC5</A>       ; 1541 ROM: Power-up RESET routine
+
+    <A HREF="R037F.html">Previous Page</A> / <A HREF="R0403.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0400.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:28 GMT -->
+</HTML>

@@ -1,0 +1,81 @@
+<HTML>
+<!-- Mirrored from rittwage.com/RL6Handbook_v130/R0745.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:34 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R0733.html">Previous Page</A> <A HREF="R0786.html">Next Page</A>
+
+
+Routine $0745:   Wait for next sector start, set Job #1, set [$1D], set [$11], get Track Key.
+<P>
+If call to $0745: Wait for next sector start, set Job #1 to execute, set [$1D], set [$11],
+                  get Key for current Track.
+If call to $075D: Set [$1D], set [$11], get Key for current Track.
+If jump to $0764: Set [$11], get Key for current Track.
+If jump to $0769: Get Key for current Track.
+</P>
+
+JSR from <A HREF="R0678.html">$068E</A>:
+
+0745: A5 0A     LDA <A HREF="M0001.html">$0A</A>
+0747: 30 2D     BMI $0776
+
+0749: 20 26 07  JSR <A HREF="R0725.html">$0726</A>      ; Counts the data bytes (returned in A,Y) until next SYNC is detected. CF:=1.
+074C: C0 18     CPY #$18       ; compare number of data bytes with $18
+074E: 90 26     BCC $0776      ;   branch if <$18
+
+0750: A2 D0     LDX #$D0
+0752: 86 01     STX <A HREF="M0001.html">$01</A>        ; set Job #1 to $D0 (execute <A HREF="R0400.html">$0400</A>) again
+0754: 20 3F 07  JSR <A HREF="R0733.html">$073F</A>      ; measure length of next following SYNC mark (in X)
+0757: E0 2A     CPX #$2A       ; compare SYNC length with $2A
+0759: 90 22     BCC $077D      ;   branch if <$2A
+
+075B: 86 11     STX <A HREF="M0001.html">$11</A>        ; [$11]:= SYNC length
+
+JSR from <A HREF="R0587.html">$058C</A>:
+
+075D: AD 50 01  LDA <A HREF="M0150.html">$0150</A>
+0760: 85 1D     STA <A HREF="M001D.html">$1D</A>        ; [$1D]:= [$0150]
+0762: A5 11     LDA <A HREF="M0001.html">$11</A>
+
+Jump from <A HREF="R052A.html">$0555</A>:
+
+0764: 38        SEC
+0765: E5 1D     SBC <A HREF="M001D.html">$1D</A>
+0767: 85 11     STA <A HREF="M0001.html">$11</A>        ; [$11]:= A - [$1D]
+
+Jump from <A HREF="R06B2.html">$06F0</A>:
+
+0769: A6 22     LDX <A HREF="M0022.html">$22</A>
+076B: E0 13     CPX #$13       ; compare [$22] with 19
+076D: 90 02     BCC $0771      ;   branch if <19
+
+076F: CA        DEX
+0770: CA        DEX
+
+Jump from $076D:
+
+0771: BD 52 01  LDA <A HREF="M0152.html">$0152,X</A>    ; get Key for current Track (read from Track 36 Key Sector)
+0774: 85 0E     STA <A HREF="M0001.html">$0E</A>        ; [$0E]:= Key (~number of #$7B's in extra sector)
+
+Jump from $0747, $074E, $0781:
+
+0776: A9 EE     LDA #$EE       ; set [$1C0C]:= 11101110b (111 = CA2+CB2 High output,
+0778: 8D 0C 1C  STA <A HREF="M1C0C.html">$1C0C</A>      ;                            0 = CA1+CB1 Negative active edge )
+077B: 18        CLC
+077C: 60        RTS
+
+Jump from $076D:
+
+077D: 66 12     ROR <A HREF="M0012.html">$12</A>
+077F: C6 D4     DEC <A HREF="M00D4.html">$D4</A>
+0781: 10 F3     BPL $0776
+
+Jump from <A HREF="R0700.html">$0713</A>:
+
+0783: 4C D5 07  JMP <A HREF="R0786.html">$07D5</A>      ; error: branch to exit of RapidLok - <B>Avoid this!!!</B>
+
+    <A HREF="R0733.html">Previous Page</A> / <A HREF="R0786.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/RL6Handbook_v130/R0745.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:34 GMT -->
+</HTML>

@@ -1,0 +1,141 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0587.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:28 GMT -->
+<HEAD><TITLE>RapidLok6 Handbook Version 1.3</TITLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A> <A HREF="RMAIN.html">Routine Index</A> <A HREF="MMAIN.html">Memory Index</A>
+<A HREF="R0558.html">Previous Page</A> <A HREF="R0604.html">Next Page</A>
+
+
+Routine $0587:   File transfer management
+
+<P>This routine reads and transfers the demanded file (incl. shadow files).
+
+Parameters:
+[$C2]: Start/working/end Track of file to read & transfer
+[$D7]: Start sector ID of file to find & read
+
+Local parameters:
+[$B5-$B6]: bytes left to be transferred to C64-client (~length of file)
+[$B7]: =0 if file transfer complete
+       <>0 if (at least one more) shadow files to be transferred
+[$23]: ID of sector to find & read
+</P>
+
+Jump from <A HREF="R0558.html">$0562</A>, <A HREF="R0558.html">$057C</A>:
+
+0587: 78        SEI
+0588: A9 D0     LDA #$D0
+058A: 85 01     STA <A HREF="M0001.html">$01</A>        ; set Job #1 to execute (<A HREF="R0400.html">$0400</A>)
+058C: 20 5D 07  JSR <A HREF="R0745.html">$075D</A>      ; set [$1D] & [$11], get Key for current Track.
+058F: A5 D7     LDA <A HREF="M00D6.html">$D7</A>
+0591: 85 23     STA <A HREF="M0023.html">$23</A>        ; [$23]:= [$D7] start Sector of file
+0593: A6 C2     LDX <A HREF="M00C2.html">$C2</A>        ; [$C2] = start Track of file (from now on: current Track)
+0595: 24 E8     BIT $E8        ; dummy command
+0597: 24 CA     BIT $CA        ; dummy command
+///////////////////////////
+
+Jump from $05E3:
+
+0596: E8        INX            ; increase current Track [$C2]
+0597: 24 CA     BIT $CA
+///////////////////////////
+
+Jump from $05DF:
+
+0598: CA        DEX            ; decrease current Track [$C2]
+///////////////////////////
+
+Jump from $05E7:
+
+0599: 86 C2     STX <A HREF="M00C2.html">$C2</A>        ; set current (~target) Track [$C2]
+059B: 20 B9 06  JSR <A HREF="R06B2.html">$06B9</A>      ; Move head to custom Track (Track number in X), set Bit rate & Track Key
+059E: A9 09     LDA #$09
+05A0: 85 C6     STA <A HREF="M00C6.html">$C6</A>        ; [$C6]:=9 tries for head repositioning onto Track (inside $0422 routine below)
+05A2: 85 E7     STA <A HREF="M00E7.html">$E7</A>        ; [$E7]:=9 number of tries to find $6B data sectors in $0422 routine below
+05A4: 20 22 04  JSR <A HREF="R0415.html">$0422</A>      ; read specific $6B data sector, RL integrity checks. CF=0 if all ok.
+05A7: B0 59     BCS $0602      ; branch to exit on error (RTS to <A HREF="R0786.html">$07D5</A>)
+
+05A9: A6 7B     LDX <A HREF="M0077.html">$7B</A>        ; File transfer of very first data sector starts in buffer [$7B*$100]
+05AB: 06 0A     ASL <A HREF="M0001.html">$0A</A>        ; initially [$0A]=$80=10000000b
+05AD: B0 06     BCS $05B5      ; branches only when very first data sector loaded (-> use initial [<A HREF="M0077.html">$7A</A>] value)
+
+05AF: A6 16     LDX <A HREF="M0016.html">$16</A>
+05B1: 65 15     ADC <A HREF="M0015.html">$15</A>        ; add default offset to start of file data in [$0400] buffer (usually [$15]=$88)
+05B3: 85 7A     STA <A HREF="M0077.html">$7A</A>        ; offset pointer for file transfer parameters
+
+Jump from $05AD, $05D0:
+
+05B5: 86 31     STX <A HREF="M0030.html">$31</A>        ; hi address for file transfer in $0625 routine
+
+Jump from $05C7:
+
+05B7: A4 7A     LDY <A HREF="M0077.html">$7A</A>        ; [$7A] is current offset pointer for file transfer parameters
+05B9: A6 79     LDX <A HREF="M0077.html">$79</A>        ; [$79] is (negative) number of parameters to copy for $0625 routine below
+05BB: 10 15     BPL $05D2      ; branch if no new parameters needed
+
+05BD: B1 30     LDA (<A HREF="M0030.html">$30</A>),Y
+05BF: 95 B8     STA <A HREF="M00B5.html">$B8,X</A>      ; copy first 3 bytes of sector to [$B5-$B7] (initially [$79]=-3)
+05C1: E8        INX
+05C2: 86 79     STX <A HREF="M0077.html">$79</A>        ; update number of parameters to copy
+
+Jump from $0600 (used when shadow file is to be transferred):
+
+05C4: C8        INY            ; (shadow files: Y was not increased after last file transfer in $0625 routine)
+05C5: 84 7A     STY <A HREF="M0077.html">$7A</A>        ; update current offset pointer for file transfer parameters
+05C7: D0 EE     BNE $05B7
+
+05C9: A6 16     LDX <A HREF="M0016.html">$16</A>
+05CB: E4 31     CPX <A HREF="M0030.html">$31</A>        ; hi address for file transfer in $0625 routine
+05CD: D0 08     BNE $05D7
+
+05CF: CA        DEX
+05D0: D0 E3     BNE $05B5
+
+Jump from $05BB:
+
+05D2: 20 25 06  JSR <A HREF="R0625.html">$0625</A>      ; File transfer: [$B5-$B6] bytes starting at ($30),Y
+05D5: B0 12     BCS $05E9      ; CF=1 if file transfer complete, CF=0 to read next sector
+
+Jump from $05CD:
+
+05D7: A5 23     LDA <A HREF="M0023.html">$23</A>        ; [$23]<>0 if still sectors left on current Track
+05D9: D0 C3     BNE $059E
+05DB: A6 C2     LDX <A HREF="M00C2.html">$C2</A>        ; --- no sectors left on current Track here, move to "next" Track ---
+05DD: E0 13     CPX #$13
+05DF: 90 B7     BCC $0598      ; Track:=Track-1 if Track < 19.
+
+05E1: E0 23     CPX #$23
+05E3: 90 B1     BCC $0596      ; Track:=Track+1 if 19 <= Track < 35.
+
+05E5: A2 11     LDX #$11       ; current Track is 35 -> Track:=17
+05E7: D0 B0     BNE $0599
+
+Jump from $05D5:
+
+05E9: A9 08     LDA #$08       ; --- file transfer is complete here ---
+05EB: 8D 00 18  STA <A HREF="M1800.html">$1800</A>
+05EE: A2 12     LDX #$12
+
+Jump from $05F1:
+
+05F0: CA        DEX
+05F1: D0 FD     BNE $05F0
+
+05F3: A5 B7     LDA <A HREF="M00B7.html">$B7</A>        ; [$B7]=0 if shadow files are left to transfer
+05F5: D0 0B     BNE $0602      ; branch to exit if file (incl. shadow files) transferred
+
+05F7: A9 0A     LDA #$0A
+05F9: 8D 00 18  STA <A HREF="M1800.html">$1800</A>      ; signal to C64-client: more files to transfer
+05FC: A9 FD     LDA #$FD
+05FE: 85 79     STA <A HREF="M0077.html">$79</A>        ; [$79]:=-3 -> for copying 3 new parameters to [$B5-$B7] (above)
+0600: D0 C2     BNE $05C4
+
+Jump from 05A7, $05F5, <A HREF="R0604.html">$0606</A>:
+
+0602: 38        SEC
+0603: 60        RTS            ; RTS to <A HREF="R0786.html">$07D5</A> if called at $0587
+
+    <A HREF="R0558.html">Previous Page</A> / <A HREF="R0604.html">Next Page</A>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/R0587.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:54:28 GMT -->
+</HTML>

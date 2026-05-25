@@ -1,0 +1,229 @@
+<HTML>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/I_REMAST.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:53:33 GMT -->
+<HEAD><TITLE>REMAST - RapidLok6 Handbook Version 1.3</TITLE>
+<STYLE type="text/css">
+CODE { FONT-WEIGHT: bold; COLOR: #9a0000; FONT-FAMILY: "Courier New", Courier, mono }
+</STYLE></HEAD>
+<BODY><PRE><A HREF="INDEX.html">Main Index</A>
+
+
+<P><H2>Remastering a 1541 disk from G64 Pirates images</H2>
+
+For creating a working 1541 game disk from G64 Microprose Pirates images
+you will need the following:
+
+<U>Required hardware:</U> 
+
+- Windows 2000/XP PC with parallel (printer) port
+- 1541 disk drive with parallel port (hardware addon; drive ID set to 8)
+- XAP1541 parallel cable for connecting the two (other cables or USB
+  solutions may also work)
+- empty 1541 disk
+- optional: disk drive speed control
+
+<U>Required software:</U>
+
+- "nibtools 0.5.4" copy program for Windows 2000/XP
+- "opencbm 0.4.2" Windows 2000/XP drivers for connecting to the 1541
+- G64 Pirates images (e.g. supplied)
+
+The main problem with remastering is the length of the tracks: The original
+G64 track images are longer than what actually fits to disk, thus overwriting
+themselves at normal 300rpm drive speed.
+What you can do depends on your drive's capabilities, especially if you can
+manually slow down the drive speed sufficiently to get all data onto the
+tracks. Some of the older 1541 drives have a factory built in potentiometer
+you can use to manually customize the drive speed with a screwdriver (must
+open the drive).
+Without such a manual drive speed control the track images inside the G64
+images have to be shortened and you have to apply patches.
+
+
+    >> <A HREF="#WITHSPDCTRL">My drive is equipped with a manual speed control</A>
+
+    >> <A HREF="#WITHOUTSPDCTRL">My drive has no manual speed control (or I don't know)</A>
+
+
+
+
+<a id="WITHSPDCTRL"></a><H2>Remastering Pirates with a manual speed control</H2>
+
+<font style="color: #ff0000"><B>     ----- Draft version - experimental track alignment -----</B></font>
+
+Our concern here is to slow down the drive motor sufficiently to write
+all tracks out to disk in their whole length. We can use the original
+G64 images here (with fixed Track 36 key sector, and -if you like- applied
+bugfixes).
+Before you start you must set the drive speed using "rpm1541.exe" from the
+"opencbm" package before each nibwrite run. You will have to play around a
+little with the drive speeds. For tracks 1-17 a speed around 295rpm should
+be ok and for tracks 18-36 around 299.8rpm.
+
+
+                           <B>!! Warning !!
+      rpm1541.exe requires to write a signature to Track 41 !
+            Never use rpm1541.exe with original disks !</B>
+
+I played with the nibwrite parameters and the following were my choice:
+
+    -c: "disable automatic capacity adjustment".
+        <I>We do this manually with our speed control.</I>
+    -r: "disable automatic sync reduction".
+        <I>Prevents shortening of the long sync marks.</I>
+    -f: "disable automatic bad GCR detection".
+        <I>Do not write zeros instead of bad GCR bytes (gaps);
+        does not change the original data from the G64 images.
+        Make sure you have the zero area on Track 36.</I>
+    -G0: sets "manual gap match length" to zero.
+         <I>Don't change any gaps or rearrange whole track images,
+         we do this manually with our speed control (at the track gap).</I>
+
+<U>Instructions:</U> 
+
+Connect your 1541 to your PC using the XAP1541 cable (turn them off before
+connecting!) and run <CODE>instcbm.exe</CODE> from "opencbm" to start the driver.
+Now make sure your empty disk is in the 1541 drive, open a Windows command
+shell (cmd.exe) and change to the "nibtools" directory.
+
+We remaster each track range separately and in only one pass.
+Type in
+
+        <CODE>nibwrite -E17 -c -r -f -G0 side1.g64</CODE>      (at ~295rpm)
+        <CODE>nibwrite -S18 -E36 -c -r -f -G0 side1.g64</CODE> (at ~299.8rpm)
+
+to write disk side 1 (same with disk side 2 and side2.g64).
+
+You need to keep an eye on the nibwrite console output. You have to play
+around with the drive speed to avoid too many truncated bytes at the track
+cuts (e.g. "trunc:10" was too much for me) - but try to avoid too many
+off-bytes there as well. Track 36 <I>should</I> be remastered separately at
+exactly 300rpm.
+
+Finally run <CODE>instcbm.exe -r</CODE> to unload the driver. You should now have a
+working 1541 Microprose Pirates "backup" disk.
+
+Here is a complete sample <A HREF="I_RELSPD.html">console logfile</A> of the remastering using the
+manual drive speed control.
+
+
+<U>It happens that a remastered disk does not work:</U>
+
+Make sure the disk is ok or try another 1541 disk - or disk drive.
+Tracks 37-42 are not used in Pirates, so there's no problem with them.
+Is the corresponding G64 image working in WinVice (with applied patches)?
+
+<B>Problems with tracks 1-35:</B> It's very likely a track was still too long
+and got (partially) overwritten by itself. Make sure your drive speeds are
+always ok and try slightly slower speeds.
+You can also create a G64 image from the non-working disk, use WinVice
+to track down the exact track(s) and sector(s) where the problem(s) occur,
+and/or use UltraEdit in hex-mode to see what's wrong with the G64/disk
+image at the track cuts.
+Always remaster each whole track range (1-17 and 18-36) separately and
+completely in only one pass, so nibwrite can track-align the tracks.
+
+<B>Track 36 is not detected (head goes to Track 42 or so and bumps there):</B>
+Reason: Track 36 is not recognized by the $0558 routine. Re-check Track 36
+Key Sector length and remaster Track 36 again from the corresponding G64
+image file, e.g.: <CODE>nibwrite -S36 -E36 side1.g64</CODE> (at 300rpm).
+The location of the Key sector inside the G64 Track 36 image is not
+unimportant for remastering. If your Key Sector is located at the beginning
+or end of the G64 Track 36 image, then try moving the Key sector into the
+middle of the G64 Track 36 image, inside the track filling sync mark
+(using UltraEdit in hex-mode) and remaster it again.
+
+
+
+
+<a id="WITHOUTSPDCTRL"></a><H2>Remastering Pirates without manual speed control</H2>
+
+We can't write the tracks in their whole length out to disk here, so we
+need to shorten them and patch out certain integrity checks.
+A safe method would be to apply the new patches to the G64 images (disabling
+the whole protection) and shorten the tracks sufficiently ourselves as
+described. I did this with the supplied patched and bugfixed G64 Pirates
+images, you can use them here.
+
+<U>Instructions:</U> 
+
+Connect your 1541 to your PC using the XAP1541 cable (turn them off before
+connecting!) and run <CODE>instcbm.exe</CODE> from "opencbm" to start the driver. The
+drive motor speed is at the usual 300rpm as we can't adjust it here.
+Now make sure your empty disk is in the 1541 drive, open a Windows command
+shell (cmd.exe) and change to the "nibtools" directory. Then type
+
+          <CODE>nibwrite -E36 side1p.g64</CODE>
+
+to write disk side 1 (same with disk side 2 and side2p.g64).
+(side1p.g64 and side2p.g64 being your patched/bugfixed and probably track-
+shortened G64 images). Note: Remastering Track 36 is not necessary if you
+applied the new patches.
+
+Finally run <CODE>instcbm.exe -r</CODE> to unload the driver. You should now have a
+working 1541 Microprose Pirates "backup" disk.
+
+Here is a complete sample <A HREF="I_REL300.html">console logfile</A> of the remastering at the normal
+300rpm drive speed.
+
+If you intentionally use <U>uncut/unshortened</U> G64 images there will be
+truncated tracks in the nibwrite console output (e.g. "trunc:4" or so)
+and there will be no guarantee your remastered disks work.
+
+
+<U>It happens that a remastered disk does not work:</U>
+
+Make sure the disk is ok or try another 1541 disk - or disk drive.
+Tracks 37-42 are not used in Pirates, so there's no problem with them.
+Is the corresponding G64 image working in WinVice (with applied patches)?
+Use "rpm1541.exe" from the "opencbm" package to make sure your drive speed
+is close to the usual 300rpm (never let your original disk in the drive
+when using this tool!).
+
+<U><B>Problem:</B></U> There are <B>truncated tracks</B> listed in the nibwrite console log,
+         -or-
+         DOS formatted tracks cannot be read (Directory track 18,
+         tracks 1-6 on side 1, tracks 1-9 on side 2),
+         -or-
+         a file loads endlessly (new patches applied),
+         -or-
+         you encounter errors with a $0415 routine addon: several head
+         recalibrations onto track and black screen (old patches).
+
+<B>Reason:</B> It's likely a track was too long and got (partially) overwritten by
+        itself.
+
+<B>Solution 1</B>:
+  Cut the $7B extra sectors from all tracks, shorten all long Sync marks to
+  (standard) 5 bytes length and remaster again.
+  (Don't forget to adjust the two-byte G64 track lengths when cutting things).
+  Every remastered disk with the new patches should work then.
+
+<B>Solution 2</B> (problems with DOS formatted tracks):
+  Apply your chosen patches to the <U>D64</U> images and use them to remaster:
+  <CODE>nibwrite -E6 side1.d64</CODE> , <CODE>nibwrite -S18 -E18 side1.d64</CODE> for side 1, and
+  <CODE>nibwrite -E9 side2.d64</CODE> , <CODE>nibwrite -S18 -E18 side2.d64</CODE> for side 2.
+  D64 images do not contain the $7B extra sectors and all Sync marks are
+  5 bytes long. The DOS formatted tracks should really be ok now.
+
+<U><B>Problem:</B></U> Track 36 is not detected (head goes to Track 42 or so and bumps
+         there).
+
+<B>Reason:</B> Track 36 is not recognized by $0558 routine.
+
+<B>Solution 1</B> (if you have the old patches applied):
+  Re-check the length of the Key Sector (must be <253) and remaster
+  Track 36 again from the corresponding G64 image file, e.g.:
+  <CODE>nibwrite -S36 -E36 side1p.g64</CODE> .
+  Check your Key Sector location inside the Track 36 image.
+
+<B>Solution 2</B> (if you have no patches applied):
+  Re-check Key Sector and remaster Track 36 again from the corresponding
+  G64 image file. Check your Key Sector location inside the Track 36 image.
+
+<B>Solution 3</B>:
+  Use the new patches to circumvent Track 36 handling.
+</P>
+
+</PRE></BODY>
+<!-- Mirrored from rittwage.com/floppy/RL6Handbook_v130/I_REMAST.HTM by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 25 May 2026 20:53:33 GMT -->
+</HTML>
