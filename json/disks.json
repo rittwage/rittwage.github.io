@@ -1,8 +1,4 @@
 [
-{"type":"header","version":"5.2.3","comment":"Export to JSON plugin for phpMyAdmin"},
-{"type":"database","name":"c64pp_software"},
-{"type":"table","name":"disks","database":"c64pp_software","data":
-[
 {"id":"1","title":"Alien","publisher":"One-Step (Sharedata)","year":"1985","protection":"none","contributor":"sbegue","notes":"cifo - verified - alternate is 9 blocks different","verified":"1","timestamp":"2025-10-16 16:30:08","added":"2005-10-26 21:34:06"},
 {"id":"2","title":"Arctic Antics","publisher":"Epyx","year":"1987","protection":"none","contributor":"","notes":"clean image from original","verified":"0","timestamp":"2025-10-16 16:30:08","added":"2005-10-26 21:34:06"},
 {"id":"3","title":"Ballblazer (NTSC)","publisher":"Lucasfilm \/ Epyx","year":"1985","protection":"vorpal","contributor":"davem, others, ethan","notes":"cifo - verified - alternate version of this original that differs by 61sectors is also verified","verified":"2","timestamp":"2025-10-16 16:30:08","added":"2005-10-26 21:34:06"},
@@ -3651,5 +3647,4 @@
 {"id":"3804","title":"House of Usher (PAL)","publisher":"Kingsoft","year":"1984","protection":"signature on track 18","contributor":"klotz","notes":"cifo","verified":"0","timestamp":"2026-03-26 19:15:39","added":"2026-03-26 19:16:11"},
 {"id":"3805","title":"Kwik Snax (PAL)","publisher":"Codemasters","year":"1990","protection":"none","contributor":"gloupy","notes":"ifo - disk has several errors that are not protection, but aren't claimed in the BAM, so it should not be corrupt in any way","verified":"0","timestamp":"2026-05-10 12:03:11","added":"2026-05-10 12:03:11"}
 ]
-}
-]
+
