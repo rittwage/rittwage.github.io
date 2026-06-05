@@ -3,19 +3,18 @@
 <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.0/dist/bootstrap-table.min.css">
 
 <div class="container">
-  <table id="table" width=100% class="table table-bordered table-sm" data-toggle="table" data-flat="true" data-search="true" data-url="disks.json">
+  <table id="table" width=100% class="table table-bordered table-sm" data-toggle="table" data-flat="true" data-search="true" data-url="c64.json">
     <thead>
       <tr>
         <!--<th data-field="id" data-sortable="true">ID</th>-->
-        <th class="small" data-field="title" data-sortable="true" data-search="true">Title</th>
-        <th class="small" data-field="publisher" data-sortable="true" data-search="true">Publisher</th>
-        <th class="small" data-field="year" data-sortable="true" data-search="true">Year</th>
-        <th class="small" data-field="protection" data-sortable="true" data-search="true">Protection</th>
-        <th class="small" data-field="contributor" data-sortable="true" data-search="true">Contributor</th>
+        <th class="small" data-field="owner" data-sortable="true" data-search="true">Owner</th>
+        <th class="small" data-field="location" data-sortable="true" data-search="true">Location</th>
+        <th class="small" data-field="case_serial_pre" data-sortable="true" data-search="true">PreSerial</th>
+        <th class="small" data-field="case_serial" data-sortable="true" data-search="true">Serial</th>
+        <th class="small" data-field="hadge_type" data-sortable="true" data-search="true">BadgeType</th>
+        <th class="small" data-field="key_type" data-sortable="true" data-search="true">KeyType</th>
         <th class="small" data-field="notes" data-sortable="true" data-search="true">Notes</th>
-        <th class="small" data-field="verified" data-sortable="true" data-search="true">Verified</th>
-		<th class="small" data-field="added" data-sortable="true">Added</th>
-		<th class="small" data-field="timestamp" data-sortable="true">Last Changed</th>
+		<!--<th class="small" data-field="timestamp" data-sortable="true">Timestamp</th>-->
       </tr>
     </thead>
   </table>
