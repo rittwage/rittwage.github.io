@@ -1,8 +1,4 @@
 [
-{"type":"header","version":"5.2.3","comment":"Export to JSON plugin for phpMyAdmin"},
-{"type":"database","name":"c64pp_registry"},
-{"type":"table","name":"apple","database":"c64pp_registry","data":
-[
 {"id":"2101","owner":"Peter Rittwage","email":"peter@rittwage.com","location":"Augusta, GA USA","case_serial":"16974","case_serial_pre":"A2S2","case_serial_post":"","case_origin":"","board_serial":"7946","board_assembly":"","board_revision":"821-0001-04","board_origin":"","badge_type":"2","key_type":"1","photo":"","notes":"","timestamp":"2025-10-16 16:29:39"},
 {"id":"2102","owner":"Peter Rittwage","email":"peter@rittwage.com","location":"Augusta, GA USA","case_serial":"119321","case_serial_pre":"A2S2","case_serial_post":"","case_origin":"","board_serial":"8036","board_assembly":"","board_revision":"821-0001-07","board_origin":"","badge_type":"2","key_type":"2","photo":"","notes":"Power light is missing the word \"power\". It's just blank.","timestamp":"2025-10-16 16:29:39"},
 {"id":"2099","owner":"Brad H","email":"brad@bettercomputing.net","location":"Canada","case_serial":"38495","case_serial_pre":"A2S1","case_serial_post":"","case_origin":"","board_serial":"7949","board_assembly":"","board_revision":"Rev 04","board_origin":"","badge_type":"1","key_type":"0","photo":"","notes":"Not the original board but believed to be correct based on serial number.","timestamp":"2025-10-16 16:29:39"},
@@ -333,5 +329,4 @@
 {"id":"2442","owner":"Unknow","email":"faunoxx@hotmail.com","location":"Japan","case_serial":"3915","case_serial_pre":"A2S1","case_serial_post":null,"case_origin":null,"board_serial":"Unknown","board_assembly":null,"board_revision":"Rev.0","board_origin":null,"badge_type":"1","key_type":"0","photo":null,"notes":"Sold in Japan on 05\/29\/25 Resold in Germany on 07\/14\/25 for EUR 4,900 https:\/\/www.ebay.com\/itm\/187367476007","timestamp":"2025-12-22 00:05:26"},
 {"id":"2443","owner":"Unknow","email":"drakepirate@hotmail.com","location":"Japan","case_serial":"3907","case_serial_pre":"A2S1","case_serial_post":null,"case_origin":null,"board_serial":"4202","board_assembly":null,"board_revision":"Rev.0","board_origin":null,"badge_type":"1","key_type":"0","photo":null,"notes":"Complete except missing Lid,  Winchester Light Green Slots. Sold in Japan on 04\/25\/26 for 400,000 Yen","timestamp":"2026-04-27 09:29:32"}
 ]
-}
-]
+

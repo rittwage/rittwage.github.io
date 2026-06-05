@@ -1,8 +1,4 @@
 [
-{"type":"header","version":"5.2.3","comment":"Export to JSON plugin for phpMyAdmin"},
-{"type":"database","name":"c64pp_registry"},
-{"type":"table","name":"c64","database":"c64pp_registry","data":
-[
 {"id":"1","owner":"Unknown","email":"","location":"USA","case_serial":"0019","case_serial_pre":"","case_serial_post":"","case_origin":"","board_serial":"","board_assembly":"326298","board_revision":"6","board_origin":"","badge_type":"1","key_type":"0","photo":"","notes":"Prototype auctioned at VCF 2003.  Power light label says \"POWER\" and not \"64\" like the first production runs.  Serial number is a typed paper label, but matches the one for #21 that was submitted.  Ths unit belonged to Charles Winterble, according to the auction.","timestamp":"2025-10-16 16:29:39"},
 {"id":"11","owner":"Pete Rittwage","email":"peter@rittwage.com","location":"Augusta, GA, USA","case_serial":"00034894","case_serial_pre":"S","case_serial_post":"","case_origin":"USA","board_serial":"110511","board_assembly":"326298","board_revision":"A","board_origin":"","badge_type":"1","key_type":"1","photo":"","notes":"This came from eBay in the early 2000's.  Unfortunately, I don't recall where it came from, but it was the US.","timestamp":"2025-10-16 16:29:39"},
 {"id":"12","owner":"Pete Rittwage","email":"peter@rittwage.com","location":"Augusta, GA, USA","case_serial":"1053282","case_serial_pre":"CA","case_serial_post":"C","case_origin":"USA","board_serial":"","board_assembly":"","board_revision":"","board_origin":"","badge_type":"21","key_type":"2","photo":"","notes":"","timestamp":"2025-10-16 16:29:39"},
@@ -4746,5 +4742,4 @@
 {"id":"4840","owner":"Marcello Porro","email":"marcello.porro71@gmail.com","location":"Switzerland","case_serial":"004754","case_serial_pre":"DA4","case_serial_post":"B1","case_origin":"W.Germany","board_serial":"925423","board_assembly":"250425","board_revision":"","board_origin":"Hong Kong","badge_type":"21","key_type":"2","photo":null,"notes":"all MOS chips from 1186-1386\r\nexcept SID 6581R4 1686 and VIC-II 6569R5 1886","timestamp":"2026-04-23 21:12:17"},
 {"id":"4841","owner":"Michel Iotti","email":"michel.iotti@gmail.com","location":"Modena, Italy","case_serial":"19791","case_serial_pre":"WGA","case_serial_post":"","case_origin":"West Germany","board_serial":"","board_assembly":"250407","board_revision":"A","board_origin":"","badge_type":"11","key_type":"1","photo":null,"notes":"","timestamp":"2026-05-07 05:50:14"}
 ]
-}
-]
+
