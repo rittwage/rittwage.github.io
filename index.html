@@ -701,7 +701,8 @@ table.data td.num { text-align: right; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 142px;
+  width: 196px;
+  max-width: 100%;
   padding: 7px 6px 6px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -709,13 +710,13 @@ table.data td.num { text-align: right; }
   cursor: pointer;
 }
 .c64-choice input { position: absolute; opacity: 0; pointer-events: none; }
-.c64-choice img { height: 24px; width: auto; max-width: 100%; }
+.c64-choice img { height: 26px; width: auto; max-width: none; }
 .c64-choice .other {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 40px;
-  height: 24px;
+  height: 26px;
   color: var(--muted);
   font-size: 1rem;
 }
@@ -808,7 +809,7 @@ table.data td.num { text-align: right; }
   .page .lead { font-size: 1rem; }
   .table-meta { margin-left: 0; width: 100%; }
   .field, .field.half { grid-column: 1 / -1; }
-  .c64-choice { width: calc(50% - 4px); }
+  .c64-choice { width: 100%; }
   .c64-picker.keys .c64-choice { width: calc(33.333% - 6px); }
   .site-footer { margin-top: 36px; }
 }
