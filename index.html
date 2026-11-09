@@ -546,6 +546,22 @@ main {
   font-size: .78rem;
   white-space: nowrap;
 }
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 0 0 12px;
+  padding: 7px 10px;
+  border: 1px solid rgba(111, 179, 255, .35);
+  border-radius: 8px;
+  background: rgba(111, 179, 255, .08);
+  color: #cfdae8;
+  font-size: .8rem;
+}
+.filter-bar .filter-text { flex: 1 1 260px; }
+.filter-bar .btn { flex: 0 0 auto; }
 .table-meta {
   margin-left: auto;
   color: var(--muted);
@@ -597,13 +613,33 @@ table.data .cell-note { margin-top: 3px; color: var(--muted); font-size: .78rem;
 table.data td.mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; white-space: nowrap; }
 table.data td.nowrap { white-space: nowrap; }
 table.data td.num { text-align: right; }
+.type-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+}
+.type-btn:hover { border-color: #8fa9c9; background: rgba(111, 179, 255, .08); }
+.type-btn.active {
+  border-color: var(--accent);
+  background: rgba(111, 179, 255, .16);
+  box-shadow: inset 0 0 0 1px rgba(111, 179, 255, .35);
+}
 .type-img {
-  height: 21px;
+  height: 26px;
   width: auto;
+  max-width: none;
   vertical-align: middle;
   border-radius: 2px;
+  display: block;
 }
 .type-other { color: var(--muted); font-size: .78rem; }
+.type-btn .type-other { padding: 4px 6px; }
 
 .pager {
   display: flex;
@@ -2807,16 +2843,24 @@ the case serial number are required — everything else helps but is optional.</
     return "Type " + key;
   }
 
-  function typeImage(map, value) {
+  function typeImage(map, value, field, state) {
     var key = value === null || value === undefined ? "" : String(value).trim();
     if (key === "") return "";
     var entry = map[key];
-    if (!entry) {
-      return '<span class="type-other" title="' + esc(typeName(map, key)) + '">' +
-        (key === "99" ? "Other" : esc(key)) + "</span>";
+    var label = typeName(map, key);
+    var active = !!(state && state.filters && state.filters[field] === key);
+    var action = (active ? "Remove filter: " : "Filter by: ") + label;
+    var inner;
+    if (entry) {
+      inner = '<img class="type-img" src="' + C64_IMAGE_PATH + entry.file + '" alt="' +
+        esc(label) + '" loading="lazy">';
+    } else {
+      inner = '<span class="type-other">' + (key === "99" ? "Other" : esc(key)) + "</span>";
     }
-    return '<img class="type-img" src="' + C64_IMAGE_PATH + entry.file + '" alt="' +
-      esc(entry.name) + '" title="' + esc(entry.name) + '" loading="lazy">';
+    return '<button type="button" class="type-btn' + (active ? " active" : "") +
+      '" data-type-filter="' + esc(field) + '" data-type-value="' + esc(key) +
+      '" aria-pressed="' + (active ? "true" : "false") + '" title="' + esc(action) +
+      '" aria-label="' + esc(action) + '">' + inner + "</button>";
   }
 
   var DATA_TABLES = {
@@ -2863,13 +2907,13 @@ the case serial number are required — everything else helps but is optional.</
           key: "badge_type",
           label: "Badge",
           value: function (row) { return typeName(C64_BADGES, row.badge_type); },
-          render: function (row) { return typeImage(C64_BADGES, row.badge_type); }
+          render: function (row, state) { return typeImage(C64_BADGES, row.badge_type, "badge_type", state); }
         },
         {
           key: "key_type",
           label: "Keyboard",
           value: function (row) { return typeName(C64_KEYS, row.key_type); },
-          render: function (row) { return typeImage(C64_KEYS, row.key_type); }
+          render: function (row, state) { return typeImage(C64_KEYS, row.key_type, "key_type", state); }
         },
         {
           key: "board",
@@ -2977,6 +3021,10 @@ the case serial number are required — everything else helps but is optional.</
         (config.toolbar || "") +
         '<div class="table-meta" aria-live="polite"></div>' +
       "</div>" +
+      (config.filters && config.filters.length
+        ? '<div class="filter-bar" hidden><span class="filter-text" aria-live="polite"></span>' +
+          '<button type="button" class="btn btn-sm" data-clear-filters>Clear filters</button></div>'
+        : "") +
       '<div class="table-scroll"><table class="data"><thead><tr>' + head +
         '</tr></thead><tbody></tbody></table></div>' +
       '<div class="pager">' +
@@ -2999,6 +3047,9 @@ the case serial number are required — everything else helps but is optional.</
     var prev = app.querySelector('[data-page="prev"]');
     var next = app.querySelector('[data-page="next"]');
     var pageSizeSelect = app.querySelector("[data-page-size]");
+    var filterBar = app.querySelector(".filter-bar");
+    var filterText = app.querySelector(".filter-text");
+    var clearFilters = app.querySelector("[data-clear-filters]");
 
     function valueFor(column, row) {
       if (column.value) return column.value(row);
@@ -3031,6 +3082,21 @@ the case serial number are required — everything else helps but is optional.</
       av = String(av === null || av === undefined ? "" : av);
       bv = String(bv === null || bv === undefined ? "" : bv);
       return av.localeCompare(bv, undefined, { numeric: true, sensitivity: "base" });
+    }
+
+    function syncFilterControls() {
+      Array.prototype.forEach.call(app.querySelectorAll("[data-filter]"), function (select) {
+        var field = select.getAttribute("data-filter");
+        select.value = state.filters[field] || "";
+      });
+    }
+
+    function toggleTypeFilter(field, value) {
+      if (state.filters[field] === value) delete state.filters[field];
+      else state.filters[field] = value;
+      state.page = 1;
+      syncFilterControls();
+      render();
     }
 
     function render() {
@@ -3072,7 +3138,7 @@ the case serial number are required — everything else helps but is optional.</
       } else {
         tbody.innerHTML = filtered.slice(start, end).map(function (row) {
           return "<tr>" + config.columns.map(function (column) {
-            var content = column.render ? column.render(row) : esc(row[column.key]);
+            var content = column.render ? column.render(row, state) : esc(row[column.key]);
             return '<td' + (column.cls ? ' class="' + column.cls + '"' : "") + ">" + content + "</td>";
           }).join("") + "</tr>";
         }).join("");
@@ -3086,6 +3152,26 @@ the case serial number are required — everything else helps but is optional.</
         : "Page 1 of 1";
       prev.disabled = state.page <= 1;
       next.disabled = state.page >= totalPages;
+
+      if (filterBar) {
+        var activeFields = Object.keys(state.filters);
+        if (!activeFields.length) {
+          filterBar.hidden = true;
+        } else {
+          filterBar.hidden = false;
+          filterText.textContent = activeFields.map(function (field) {
+            var filter = null;
+            var list = config.filters || [];
+            for (var i = 0; i < list.length; i++) {
+              if (list[i].key === field) { filter = list[i]; break; }
+            }
+            return (filter ? filter.label : field) + ": " +
+              typeName(filter ? filter.map : {}, state.filters[field]) +
+              " (" + state.filters[field] + ")";
+          }).join(" + ") + " — showing " + filtered.length.toLocaleString() +
+            " of " + state.rows.length.toLocaleString() + " entries";
+        }
+      }
 
       Array.prototype.forEach.call(app.querySelectorAll("th[data-sort]"), function (th) {
         var arrow = th.querySelector(".arrow");
@@ -3136,6 +3222,24 @@ the case serial number are required — everything else helps but is optional.</
         render();
       });
     });
+
+    if (config.filters && config.filters.length) {
+      app.addEventListener("click", function (event) {
+        var button = event.target.closest ? event.target.closest("[data-type-filter]") : null;
+        if (!button) return;
+        event.preventDefault();
+        toggleTypeFilter(button.getAttribute("data-type-filter"), button.getAttribute("data-type-value"));
+      });
+    }
+
+    if (clearFilters) {
+      clearFilters.addEventListener("click", function () {
+        state.filters = {};
+        state.page = 1;
+        syncFilterControls();
+        render();
+      });
+    }
 
     prev.addEventListener("click", function () {
       if (state.page > 1) { state.page--; render(); }
