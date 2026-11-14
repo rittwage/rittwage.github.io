@@ -251,6 +251,42 @@ main {
   margin: 0 auto;
   animation: page-in .18s ease-out;
 }
+.page-wide { max-width: 1280px; }
+.page-wide > h1,
+.page-wide > h2,
+.page-wide > .kicker,
+.page-wide > p { max-width: 900px; }
+
+@media (min-width: 1200px) {
+  .page-wide table.data {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 0;
+  }
+  .page-wide table.data th,
+  .page-wide table.data td {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .page-wide table.data th { white-space: normal; }
+  .page-wide table.data td.notes { min-width: 0; max-width: none; }
+  .page-wide table.data .cell-note { max-width: none; }
+
+  .data-app[data-table="c64"] th:nth-child(1) { width: 11%; }
+  .data-app[data-table="c64"] th:nth-child(2) { width: 9%; }
+  .data-app[data-table="c64"] th:nth-child(3) { width: 8%; }
+  .data-app[data-table="c64"] th:nth-child(4) { width: 10%; }
+  .data-app[data-table="c64"] th:nth-child(5) { width: 210px; }
+  .data-app[data-table="c64"] th:nth-child(6) { width: 8%; }
+  .data-app[data-table="c64"] th:nth-child(7) { width: 8%; }
+
+  .data-app[data-table="disks"] th:nth-child(2) { width: 13%; }
+  .data-app[data-table="disks"] th:nth-child(3) { width: 6%; }
+  .data-app[data-table="disks"] th:nth-child(4) { width: 14%; }
+  .data-app[data-table="disks"] th:nth-child(5) { width: 10%; }
+  .data-app[data-table="disks"] th:nth-child(6) { width: 7%; }
+  .data-app[data-table="disks"] th:nth-child(7) { width: 12%; }
+}
 @keyframes page-in {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: none; }
@@ -588,7 +624,7 @@ table.data th {
   position: sticky;
   top: 0;
   z-index: 2;
-  padding: 9px 10px;
+  padding: 8px;
   border-bottom: 1px solid var(--border);
   background: #272e38;
   color: #e7edf5;
@@ -601,13 +637,13 @@ table.data th {
 table.data th:hover { color: var(--accent); }
 table.data th .arrow { color: var(--accent-2); font-size: .72em; margin-left: 4px; }
 table.data td {
-  padding: 8px 10px;
+  padding: 7px 8px;
   border-bottom: 1px solid var(--border-soft);
   vertical-align: top;
 }
 table.data tbody tr:nth-child(even) td { background: rgba(255, 255, 255, .012); }
 table.data tbody tr:hover td { background: rgba(111, 179, 255, .05); }
-table.data td.notes { min-width: 220px; max-width: 420px; color: #c4cfdd; }
+table.data td.notes { min-width: 160px; max-width: 420px; color: #c4cfdd; }
 table.data .cell-primary { color: #f0f5fb; font-weight: 600; }
 table.data .cell-note { margin-top: 3px; color: var(--muted); font-size: .78rem; line-height: 1.4; max-width: 460px; }
 table.data td.mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; white-space: nowrap; }
@@ -1495,7 +1531,7 @@ On most disk systems, tracks are further divided into sectors, which are section
 </p></div>
 </section>
 
-<section class="page" id="disk-database" data-title="Disk Database" hidden>
+<section class="page page-wide" id="disk-database" data-title="Disk Database" hidden>
 <p class="kicker">Disk Preservation Project</p>
 
 <h1>Disk Database</h1>
@@ -1511,7 +1547,7 @@ it isn't a good read of the disk. <b>Verified</b> is the number of verified sets
 
 </section>
 
-<section class="page" id="c64-registry" data-title="C64 Serial Registry" hidden>
+<section class="page page-wide" id="c64-registry" data-title="C64 Serial Registry" hidden>
 <p class="kicker">Disk Preservation Project</p>
 
 <h1>C64 Serial Registry</h1>
