@@ -640,6 +640,23 @@ table.data td.num { text-align: right; }
 }
 .type-other { color: var(--muted); font-size: .78rem; }
 .type-btn .type-other { padding: 4px 6px; }
+.text-filter {
+  padding: 0 2px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+.text-filter:hover { color: #fff; background: rgba(111, 179, 255, .12); }
+.text-filter.active {
+  color: #fff;
+  background: rgba(111, 179, 255, .22);
+  text-decoration: none;
+}
 
 .pager {
   display: flex;
@@ -2864,6 +2881,17 @@ the case serial number are required — everything else helps but is optional.</
       '" aria-label="' + esc(action) + '">' + inner + "</button>";
   }
 
+  function filterTextButton(label, field, value, state) {
+    var key = value === null || value === undefined ? "" : String(value).trim();
+    if (key === "") return '<span class="muted">—</span>';
+    var active = !!(state && state.filters && state.filters[field] === key);
+    var action = (active ? "Remove filter: " : "Filter by: ") + label + " " + key;
+    return '<button type="button" class="text-filter' + (active ? " active" : "") +
+      '" data-type-filter="' + esc(field) + '" data-type-value="' + esc(key) +
+      '" aria-pressed="' + (active ? "true" : "false") + '" title="' + esc(action) +
+      '" aria-label="' + esc(action) + '">' + esc(key) + "</button>";
+  }
+
   var DATA_TABLES = {
     disks: {
       src: "disks.json",
@@ -2892,17 +2920,28 @@ the case serial number are required — everything else helps but is optional.</
       src: "c64.json",
       placeholder: "Search owners, serials, locations, notes…",
       pageSize: 100,
-      defaultSort: { key: "serial", dir: 1 },
+      defaultSort: { key: "id", dir: 1 },
       columns: [
         { key: "owner", label: "Owner" },
         { key: "location", label: "Location" },
+        {
+          key: "case_serial_pre",
+          label: "Pre-serial",
+          cls: "mono",
+          value: function (row) { return row.case_serial_pre || ""; },
+          render: function (row, state) {
+            return filterTextButton("pre-serial", "case_serial_pre", row.case_serial_pre, state);
+          }
+        },
         {
           key: "serial",
           label: "Serial",
           cls: "mono",
           type: "serial",
           value: c64Serial,
-          render: function (row) { return esc(c64Serial(row)); }
+          render: function (row) {
+            return esc([row.case_serial, row.case_serial_post].filter(Boolean).join(""));
+          }
         },
         {
           key: "badge_type",
@@ -2935,6 +2974,7 @@ the case serial number are required — everything else helps but is optional.</
         { key: "badge_type", label: "Badge", map: C64_BADGES },
         { key: "key_type", label: "Keyboard", map: C64_KEYS }
       ],
+      filterLabels: { case_serial_pre: "Pre-serial" },
       toolbar: '<a class="btn btn-sm btn-primary" href="#add-c64">Add your C64</a>'
     }
   };
@@ -3166,9 +3206,11 @@ the case serial number are required — everything else helps but is optional.</
             for (var i = 0; i < list.length; i++) {
               if (list[i].key === field) { filter = list[i]; break; }
             }
-            return (filter ? filter.label : field) + ": " +
-              typeName(filter ? filter.map : {}, state.filters[field]) +
-              " (" + state.filters[field] + ")";
+            var value = state.filters[field];
+            var display = filter && filter.map ? typeName(filter.map, value) : value;
+            var suffix = filter && filter.map ? " (" + value + ")" : "";
+            return (filter ? filter.label : (config.filterLabels && config.filterLabels[field]) || field) +
+              ": " + display + suffix;
           }).join(" + ") + " — showing " + filtered.length.toLocaleString() +
             " of " + state.rows.length.toLocaleString() + " entries";
         }
