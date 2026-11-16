@@ -14,8 +14,10 @@ preservation projects now live in **`index.html`**, with the section navigation 
   - `disks.json` — C64PP disk database
   - `c64.json` — Commodore 64 serial registry
 - Badge/keyboard pictures used by the C64 registry and entry form are in `assets/img/c64/`.
-- In the C64 registry, click a badge, keyboard picture or pre-serial value to filter the
-  table; click it again (or use **Clear filters**) to remove that filter.
+- In the C64 registry, click a badge, keyboard picture, pre-serial value or a prefix in the
+  **Pre-serial types** table to filter; click it again (or use **Clear filters**) to remove it.
+- The C64 registry also includes a live **Pre-serial types** table below the registry, with
+  counts and origin descriptions.
 - The Rapidlok handbooks remain standalone documents in `RL1_Notes_v10/`,
   `RL2_Notes_v11/` and `RL6Handbook_v130/`; the three corresponding sections embed them
   in an iframe, just like the old site did.

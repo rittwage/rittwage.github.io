@@ -694,6 +694,99 @@ table.data td.num { text-align: right; }
   text-decoration: none;
 }
 
+.prefix-summary { margin: 0 0 24px; }
+.prefix-summary h2 {
+  margin: 0 0 6px;
+  color: #f3f7fd;
+  font-size: 1.3rem;
+  line-height: 1.3;
+}
+.prefix-summary > p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: .9rem;
+}
+.prefix-table-scroll {
+  max-height: min(45vh, 440px);
+  overflow: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.prefix-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: .84rem;
+}
+.prefix-table th:first-child,
+.prefix-table td.prefix { width: 110px; }
+.prefix-table th.count,
+.prefix-table td.count { width: 130px; }
+.prefix-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: #272e38;
+  color: #e7edf5;
+  text-align: left;
+  white-space: nowrap;
+}
+.prefix-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: top;
+}
+.prefix-table tbody tr:hover td { background: rgba(111, 179, 255, .05); }
+.prefix-table td.prefix {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.prefix-filter {
+  padding: 0 2px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+.prefix-filter:hover { color: #fff; background: rgba(111, 179, 255, .12); }
+.prefix-filter.active {
+  color: #fff;
+  background: rgba(111, 179, 255, .22);
+  text-decoration: none;
+}
+.prefix-table td.count,
+.prefix-table th.count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.prefix-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 0;
+  background: #272e38;
+  color: #f3f7fd;
+  font-weight: 700;
+}
+.prefix-note { color: var(--muted); }
+.prefix-footnote {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: .76rem;
+  line-height: 1.5;
+}
+
 .pager {
   display: flex;
   flex-wrap: wrap;
@@ -1559,7 +1652,15 @@ the C64s that are still alive and well and in the hands of collectors around the
 information — that helps nobody. Please do not enter modern reproduction serial numbers from new
 boards.</p>
 
-<p>For a guide to the label types, click <a href="https://gona.mactar.hu/C64_registry_and_labels/C64_serial_labels.html">here!</a></p>
+<div class="prefix-summary">
+  <h2>Pre-serial types</h2>
+  <p>Registered Commodore 64s grouped by the prefix printed before the case serial number.</p>
+  <div id="prefix-summary-content">
+    <p class="data-status">Loading pre-serial totals…</p>
+  </div>
+</div>
+
+<p>For a pictorial guide to the label types, click <a href="https://gona.mactar.hu/C64_registry_and_labels/C64_serial_labels.html">here</a> for Adam Wilson's great work.</p>
 
 <div class="data-app" data-table="c64">
   <p class="data-status">Loading c64.json…</p>
@@ -2922,6 +3023,7 @@ the case serial number are required — everything else helps but is optional.</
 
   function filterTextButton(label, field, value, state) {
     var key = value === null || value === undefined ? "" : String(value).trim();
+    if (field === "case_serial_pre") key = normalizePrefix(key);
     if (key === "") return '<span class="muted">—</span>';
     var active = !!(state && state.filters && state.filters[field] === key);
     var action = (active ? "Remove filter: " : "Filter by: ") + label + " " + key;
@@ -2929,6 +3031,94 @@ the case serial number are required — everything else helps but is optional.</
       '" data-type-filter="' + esc(field) + '" data-type-value="' + esc(key) +
       '" aria-pressed="' + (active ? "true" : "false") + '" title="' + esc(action) +
       '" aria-label="' + esc(action) + '">' + esc(key) + "</button>";
+  }
+
+  var PRE_SERIAL_INFO = {
+    "S": "Santa Clara, CA",
+    "P": "West Chester, PA",
+    "RP": "West Chester, PA — Refurb/Repair",
+    "C": "Canada",
+    "SC": "Canada, or South America (Drean)",
+    "UKB": "United Kingdom",
+    "UKI": "United Kingdom",
+    "HB": "Hong Kong, China",
+    "CH": "Hong Kong, China",
+    "WGA": "West Germany",
+    "WGB": "West Germany",
+    "WGC": "West Germany",
+    "WGU": "West Germany",
+    "DA4": "West Germany",
+    "DA5": "West Germany",
+    "CA": "USA, C64C; West Germany"
+  };
+
+  function normalizePrefix(value) {
+    var raw = String(value === null || value === undefined ? "" : value)
+      .trim().toUpperCase().replace(/\s+/g, " ");
+    if (!raw) return "";
+    var compact = raw.replace(/[.\s]/g, "");
+    if (compact === "UBK" || /^UKB\d*$/.test(compact)) return "UKB";
+    return raw;
+  }
+
+  function renderPrefixSummary(rows, container, tableApp) {
+    if (!container) return;
+    var counts = Object.create(null);
+    rows.forEach(function (row) {
+      var key = normalizePrefix(row.case_serial_pre);
+      counts[key] = (counts[key] || 0) + 1;
+    });
+
+    var entries = Object.keys(counts).map(function (key) {
+      return {
+        key: key,
+        count: counts[key],
+        label: key || "(none)",
+        description: key
+          ? (PRE_SERIAL_INFO[key] || (/^HB/.test(key) ? "Hong Kong, China" : ""))
+          : "No prefix"
+      };
+    }).filter(function (entry) {
+      return entry.count > 1;
+    }).sort(function (a, b) {
+      return b.count - a.count || a.label.localeCompare(b.label, undefined, { numeric: true });
+    });
+
+    var listedTotal = entries.reduce(function (sum, entry) {
+      return sum + entry.count;
+    }, 0);
+
+    var body = entries.map(function (entry) {
+      var label = entry.key
+        ? '<button type="button" class="prefix-filter" data-prefix-filter="' +
+            esc(entry.key) + '" aria-pressed="false" title="Filter registry by prefix ' +
+            esc(entry.label) + '">' + esc(entry.label) + '</button>'
+        : '<span class="prefix-note">(none)</span>';
+      var description = entry.description
+        ? esc(entry.description)
+        : '<span class="prefix-note">Not documented</span>';
+      return '<tr><td class="prefix">' + label + '</td><td class="count">' +
+        entry.count.toLocaleString() + '</td><td>' + description + '</td></tr>';
+    }).join("");
+
+    container.innerHTML =
+      '<div class="prefix-table-scroll"><table class="prefix-table">' +
+        '<thead><tr><th scope="col">Prefix</th><th scope="col" class="count">Registered</th>' +
+        '<th scope="col">Origin / notes</th></tr></thead>' +
+        '<tbody>' + body + '</tbody>' +
+        '<tfoot><tr class="total"><td>Total</td><td class="count">' +
+          listedTotal.toLocaleString() + '</td><td></td></tr></tfoot>' +
+      '</table></div>' +
+      '<p class="prefix-footnote">Single-entry prefixes are omitted. Prefixes are grouped ' +
+      'case-insensitively; variants such as <b>U.K.B</b> are included with <b>UKB</b>. ' +
+      '<b>CA</b> and <b>SC</b> each cover more than one origin.</p>';
+
+    container.onclick = function (event) {
+      var button = event.target.closest ? event.target.closest("[data-prefix-filter]") : null;
+      if (!button || !tableApp || typeof tableApp._toggleTypeFilter !== "function") return;
+      event.preventDefault();
+      tableApp._toggleTypeFilter("case_serial_pre", button.getAttribute("data-prefix-filter"));
+    };
   }
 
   var DATA_TABLES = {
@@ -3014,6 +3204,7 @@ the case serial number are required — everything else helps but is optional.</
         { key: "key_type", label: "Keyboard", map: C64_KEYS }
       ],
       filterLabels: { case_serial_pre: "Pre-serial" },
+      prefixSummary: true,
       toolbar: '<a class="btn btn-sm btn-primary" href="#add-c64">Add your C64</a>'
     }
   };
@@ -3054,6 +3245,9 @@ the case serial number are required — everything else helps but is optional.</
     loadData(config.src).then(function (rows) {
       if (!Array.isArray(rows)) throw new Error("Unexpected data format");
       buildTable(app, config, rows);
+      if (config.prefixSummary) {
+        renderPrefixSummary(rows, document.getElementById("prefix-summary-content"), app);
+      }
     }).catch(function (error) {
       var direct = location.protocol === "file:";
       app.innerHTML =
@@ -3064,6 +3258,12 @@ the case serial number are required — everything else helps but is optional.</
             " then open <span class=\"code\">http://localhost:8000/</span>."
           : "<br>" + esc(error.message)) +
         "</p>";
+      if (config.prefixSummary) {
+        var summary = document.getElementById("prefix-summary-content");
+        if (summary) {
+          summary.innerHTML = '<p class="data-status error">Could not load pre-serial totals.</p>';
+        }
+      }
     });
   }
 
@@ -3172,11 +3372,26 @@ the case serial number are required — everything else helps but is optional.</
     }
 
     function toggleTypeFilter(field, value) {
+      if (field === "case_serial_pre") value = normalizePrefix(value);
       if (state.filters[field] === value) delete state.filters[field];
       else state.filters[field] = value;
       state.page = 1;
       syncFilterControls();
       render();
+      return state.filters[field] === value;
+    }
+    app._toggleTypeFilter = toggleTypeFilter;
+
+    function syncPrefixSummaryActive() {
+      var activePrefix = state.filters.case_serial_pre || "";
+      Array.prototype.forEach.call(
+        document.querySelectorAll("#prefix-summary-content .prefix-filter"),
+        function (button) {
+          var active = button.getAttribute("data-prefix-filter") === activePrefix;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", active ? "true" : "false");
+        }
+      );
     }
 
     function render() {
@@ -3198,7 +3413,10 @@ the case serial number are required — everything else helps but is optional.</
         }
         for (var field in state.filters) {
           if (!Object.prototype.hasOwnProperty.call(state.filters, field)) continue;
-          if (String(row[field]) !== state.filters[field]) return false;
+          var rowValue = field === "case_serial_pre"
+            ? normalizePrefix(row[field])
+            : String(row[field]);
+          if (rowValue !== state.filters[field]) return false;
         }
         return true;
       });
@@ -3263,6 +3481,8 @@ the case serial number are required — everything else helps but is optional.</
           arrow.textContent = "";
         }
       });
+
+      syncPrefixSummaryActive();
     }
 
     var searchTimer = null;
