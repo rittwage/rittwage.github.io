@@ -720,10 +720,23 @@ table.data td.num { text-align: right; }
   table-layout: fixed;
   font-size: .84rem;
 }
+.prefix-table { min-width: 700px; }
 .prefix-table th:first-child,
 .prefix-table td.prefix { width: 110px; }
 .prefix-table th.count,
-.prefix-table td.count { width: 130px; }
+.prefix-table td.count { width: 120px; }
+.prefix-table th.serial { width: 180px; white-space: nowrap; }
+.prefix-table td.serial {
+  width: 180px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  white-space: normal;
+}
+.prefix-table td.serial .serial-number { white-space: nowrap; }
+.prefix-table .prefix-owner {
+  color: var(--muted);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: .78rem;
+}
 .prefix-table th {
   position: sticky;
   top: 0;
@@ -3061,18 +3074,51 @@ the case serial number are required — everything else helps but is optional.</
     return raw;
   }
 
+  function serialValue(row) {
+    if (!row) return '<span class="prefix-note">—</span>';
+    var text = [row.case_serial, row.case_serial_post].filter(Boolean).join("");
+    if (!text) return '<span class="prefix-note">—</span>';
+    var owner = String(row.owner || "").trim();
+    return '<span class="serial-number">' + esc(text) + '</span>' +
+      (owner ? ' <span class="prefix-owner">(' + esc(owner) + ')</span>' : "");
+  }
+
   function renderPrefixSummary(rows, container, tableApp) {
     if (!container) return;
-    var counts = Object.create(null);
+    var stats = Object.create(null);
     rows.forEach(function (row) {
       var key = normalizePrefix(row.case_serial_pre);
-      counts[key] = (counts[key] || 0) + 1;
+      if (!stats[key]) {
+        stats[key] = {
+          count: 0,
+          minRow: null,
+          maxRow: null,
+          minNumber: Infinity,
+          maxNumber: -Infinity
+        };
+      }
+      var entry = stats[key];
+      entry.count++;
+      var number = serialParts(row.case_serial).number;
+      if (number !== null) {
+        if (number < entry.minNumber) {
+          entry.minNumber = number;
+          entry.minRow = row;
+        }
+        if (number > entry.maxNumber) {
+          entry.maxNumber = number;
+          entry.maxRow = row;
+        }
+      }
     });
 
-    var entries = Object.keys(counts).map(function (key) {
+    var entries = Object.keys(stats).map(function (key) {
+      var entry = stats[key];
       return {
         key: key,
-        count: counts[key],
+        count: entry.count,
+        minRow: entry.minRow,
+        maxRow: entry.maxRow,
         label: key || "(none)",
         description: key
           ? (PRE_SERIAL_INFO[key] || (/^HB/.test(key) ? "Hong Kong, China" : ""))
@@ -3096,20 +3142,24 @@ the case serial number are required — everything else helps but is optional.</
         ? esc(entry.description)
         : '<span class="prefix-note">Not documented</span>';
       return '<tr><td class="prefix">' + label + '</td><td class="count">' +
-        entry.count.toLocaleString() + '</td><td>' + description + '</td></tr>';
+        entry.count.toLocaleString() + '</td><td class="serial">' +
+        serialValue(entry.minRow) + '</td><td class="serial">' +
+        serialValue(entry.maxRow) + '</td><td>' + description + '</td></tr>';
     }).join("");
 
     container.innerHTML =
       '<div class="prefix-table-scroll"><table class="prefix-table">' +
         '<thead><tr><th scope="col">Prefix</th><th scope="col" class="count">Registered</th>' +
+        '<th scope="col" class="serial">Smallest serial</th>' +
+        '<th scope="col" class="serial">Largest serial</th>' +
         '<th scope="col">Origin / notes</th></tr></thead>' +
         '<tbody>' + body + '</tbody>' +
         '<tfoot><tr class="total"><td>Total</td><td class="count">' +
-          listedTotal.toLocaleString() + '</td><td></td></tr></tfoot>' +
+          listedTotal.toLocaleString() + '</td><td></td><td></td><td></td></tr></tfoot>' +
       '</table></div>' +
-      '<p class="prefix-footnote">Prefixes are grouped ' +
-      'case-insensitively; variants such as <b>U.K.B</b> are included with <b>UKB</b>. ' +
-      '<b>CA</b> and <b>SC</b> each cover more than one origin.</p>';
+      '<p class="prefix-footnote">Smallest and largest serials use the numeric part of the ' +
+      'case serial. Prefixes are grouped case-insensitively; variants such as <b>U.K.B</b> ' +
+      'are included with <b>UKB</b>. <b>CA</b> and <b>SC</b> each cover more than one origin.</p>';
 
     container.onclick = function (event) {
       var button = event.target.closest ? event.target.closest("[data-prefix-filter]") : null;
