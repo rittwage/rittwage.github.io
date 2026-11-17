@@ -3078,8 +3078,6 @@ the case serial number are required — everything else helps but is optional.</
           ? (PRE_SERIAL_INFO[key] || (/^HB/.test(key) ? "Hong Kong, China" : ""))
           : "No prefix"
       };
-    }).filter(function (entry) {
-      return entry.count > 1;
     }).sort(function (a, b) {
       return b.count - a.count || a.label.localeCompare(b.label, undefined, { numeric: true });
     });
@@ -3109,7 +3107,7 @@ the case serial number are required — everything else helps but is optional.</
         '<tfoot><tr class="total"><td>Total</td><td class="count">' +
           listedTotal.toLocaleString() + '</td><td></td></tr></tfoot>' +
       '</table></div>' +
-      '<p class="prefix-footnote">Single-entry prefixes are omitted. Prefixes are grouped ' +
+      '<p class="prefix-footnote">Prefixes are grouped ' +
       'case-insensitively; variants such as <b>U.K.B</b> are included with <b>UKB</b>. ' +
       '<b>CA</b> and <b>SC</b> each cover more than one origin.</p>';
 
