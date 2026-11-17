@@ -3370,7 +3370,13 @@ the case serial number are required — everything else helps but is optional.</
     }
 
     function toggleTypeFilter(field, value) {
-      if (field === "case_serial_pre") value = normalizePrefix(value);
+      if (field === "case_serial_pre") {
+        value = normalizePrefix(value);
+        if (state.filters[field] !== value) {
+          state.sortKey = "serial";
+          state.sortDir = 1;
+        }
+      }
       if (state.filters[field] === value) delete state.filters[field];
       else state.filters[field] = value;
       state.page = 1;
@@ -3474,7 +3480,7 @@ the case serial number are required — everything else helps but is optional.</
       Array.prototype.forEach.call(app.querySelectorAll("th[data-sort]"), function (th) {
         var arrow = th.querySelector(".arrow");
         if (th.getAttribute("data-sort") === state.sortKey) {
-          arrow.textContent = state.sortDir === 1 ? "?" : "?";
+          arrow.textContent = state.sortDir === 1 ? "▲" : "▼";
         } else {
           arrow.textContent = "";
         }
